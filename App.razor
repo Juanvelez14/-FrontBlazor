@@ -1,11 +1,31 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<!-- Router es el componente principal de navegación en Blazor -->
+<!-- Gestiona la navegación entre páginas según las URL sin recargar la página completa -->
+<!-- AppAssembly especifica el ensamblado que contiene los componentes de la aplicación -->
+<!-- @typeof(App).Assembly obtiene el ensamblado donde se define la clase App -->
+<Router AppAssembly="@typeof(App).Assembly">
+    <!-- Sección Found: Define qué hacer cuando se encuentra una ruta coincidente -->
+    <!-- Context="routeData" define una variable local para almacenar los datos de la ruta -->
     <Found Context="routeData">
+        <!-- RouteView renderiza el componente correspondiente a la ruta actual -->
+        <!-- RouteData contiene los datos de la ruta (componente a mostrar, parámetros, etc.) -->
+        <!-- DefaultLayout especifica el diseño predeterminado para todas las páginas -->
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        
+        <!-- FocusOnNavigate cambia el foco al encabezado principal al navegar entre páginas -->
+        <!-- Esto mejora la accesibilidad, especialmente para lectores de pantalla -->
+        <!-- Selector="h1" indica que el foco debe ir al primer elemento h1 de la página -->
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+    
+    <!-- Sección NotFound: Define qué mostrar cuando la URL no coincide con ninguna ruta -->
     <NotFound>
+        <!-- Establece el título de la página para la ruta no encontrada -->
         <PageTitle>Not found</PageTitle>
+        
+        <!-- LayoutView aplica el mismo diseño (MainLayout) a la página de error 404 -->
         <LayoutView Layout="@typeof(MainLayout)">
+            <!-- Mensaje de error mostrado al usuario cuando no se encuentra la página -->
+            <!-- El atributo role="alert" ayuda a los lectores de pantalla a identificar este mensaje como una alerta -->
             <p role="alert">Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>
