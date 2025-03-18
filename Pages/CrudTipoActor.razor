@@ -15,8 +15,9 @@
 
 <h1>Tipo Actor</h1>  <!-- Encabezado principal de la página -->
 
-<div class="mb-3">  <!-- Contenedor con margen inferior (mb-3 es una clase de Bootstrap) -->
-    <button class="btn btn-primary" disabled>Crear Nuevo (Próximamente)</button>  <!-- Botón deshabilitado para crear nuevos productos -->
+<div class="mb-3">
+    <input class="form-control" @bind="nuevoNombre" placeholder="Nombre del tipo de actor" />
+    <button class="btn btn-success mt-2" @onclick="CrearTipoActor">Crear</button>
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
@@ -32,26 +33,51 @@ else if (tiposActor == null || tiposActor.Count == 0)
 }
 else
 {
-    <div class="table-responsive">  <!-- Contenedor que hace que la tabla sea responsive (se pueda desplazar horizontalmente en dispositivos pequeños) -->
-        <table class="table table-striped">  <!-- Tabla con estilos de Bootstrap (filas alternas sombreadas) -->
-            <thead>  <!-- Encabezado de la tabla -->
-                <tr>  <!-- Fila del encabezado -->
-                    <th>id</th>  <!-- Columna para el código del producto -->
-                    <th>Nombre</th>  <!-- Columna para el nombre del producto -->
+    <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tipoActor in tiposActor)
+            {
+                var id = ObtenerValor(tipoActor, "id");
+                var nombre = ObtenerValor(tipoActor, "nombre");
+
+                <tr>
+                    <td>@id</td>
+                    <td>
+                        @if (editandoId == id)
+                        {
+                            <input @bind="nombreEditado" class="form-control" />
+                        }
+                        else
+                        {
+                            @nombre
+                        }
+                    </td>
+                    <td>
+                        @if (editandoId == id)
+                        {
+                            <button class="btn btn-sm btn-success me-1" @onclick="() => GuardarEdicion(id)">Guardar</button>
+                            <button class="btn btn-sm btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarTipoActor(id)">Eliminar</button>
+                        }
+                    </td>
                 </tr>
-            </thead>
-            <tbody>  <!-- Cuerpo de la tabla donde se muestran los datos -->
-                <!-- Bucle foreach que itera sobre cada producto en la lista -->
-                @foreach (var tipoActor in tiposActor)
-                {
-                    <tr>  <!-- Fila para cada producto -->
-                        <td>@ObtenerValor(tipoActor, "id")</td>  <!-- Celda que muestra el código usando el método auxiliar -->
-                        <td>@ObtenerValor(tipoActor, "nombre")</td>  <!-- Celda que muestra el nombre usando el método auxiliar -->
-                    </tr>
-                }
-            </tbody>
-        </table>
+            }
+        </tbody>
+    </table>
     </div>
+
 }
 
 <!-- Mostrar mensaje de error si existe -->
@@ -71,6 +97,13 @@ else
     
     // Variable para almacenar mensajes de error
     private string? errorMensaje = null;
+
+    // Variables para crear
+    private string nuevoNombre = string.Empty;
+
+    // Variables para editar
+    private string? editandoId = null;
+    private string nombreEditado = string.Empty;
     
     // Constantes para los parámetros de la API
     private const string PROYECTO = "csharpapigenerica";
@@ -137,4 +170,97 @@ else
         // Si la clave no existe, devolver cadena vacía
         return string.Empty;
     }
+
+    // Crear nuevo tipoActor
+    private async Task CrearTipoActor()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevoNombre))
+        {
+            var nuevoTipoActor = new Dictionary<string, object>
+        {
+            { "nombre", nuevoNombre }
+        };
+
+        var exito = await servicioTipoActor.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
+        if (exito)
+        {
+            await CargarProductos();
+            nuevoNombre = string.Empty;
+        }
+        else
+        {
+            errorMensaje = "No se pudo crear el tipo actor.";
+        }
+    }
 }
+
+    // Iniciar edición
+    private void EmpezarEdicion(string id, string nombreActual)
+    {
+        editandoId = id;
+        nombreEditado = nombreActual;
+    }
+
+    // Cancelar edición
+    private void CancelarEdicion()
+    {
+    editandoId = null;
+    nombreEditado = string.Empty;
+    }
+
+    // Guardar cambios de edición
+    private async Task GuardarEdicion(string id)
+    {
+        try
+        {
+            var datos = new Dictionary<string, object?>
+        {
+            { "nombre", nombreEditado } // asegúrate de usar el nombre correcto del campo
+        };
+
+        var exito = await servicioTipoActor.ActualizarTipoActorAsync(
+            PROYECTO, 
+            TABLA, 
+            "id",        // nombre de la columna clave
+            id,          // valor de la clave
+            datos
+        );
+
+        if (exito)
+        {
+            await CargarProductos();
+            CancelarEdicion();
+        }
+        else
+        {
+            errorMensaje = "No se pudo actualizar el tipo actor.";
+        }
+    }
+    catch (Exception ex)
+    {
+        errorMensaje = $"Error al actualizar: {ex.Message}";
+    }
+}
+
+    // Eliminar
+    private async Task EliminarTipoActor(string id)
+    {
+        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el tipo actor con ID {id}?");
+        if (confirmado)
+        {
+            var exito = await servicioTipoActor.EliminarAsync(PROYECTO, TABLA, "id", id);
+            if (exito)
+            {
+                await CargarProductos();
+            }
+            else
+            {
+                errorMensaje = "No se pudo eliminar el tipo actor.";
+            }
+        }
+    }
+
+    // Inyectar JavaScript runtime para mostrar confirmaciones
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    }

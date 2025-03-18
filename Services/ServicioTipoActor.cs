@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Net.Http.Json;     // Importar esta librería para usar métodos que ayudan a trabajar con JSON en solicitudes HTTP
 using System.Text;              // Necesario para trabajar con codificación de texto (UTF-8 para JSON)
 using System.Text.Json;         // Proporcionar funcionalidad para serializar y deserializar JSON
@@ -10,6 +11,7 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
     public class ServicioTipoActor  // Declarar una clase pública llamada ServicioEntidad
     {
         private readonly HttpClient _clienteHttp;       // Cliente HTTP que se usará para comunicarse con la API
+         private readonly string baseUrl = "http://localhost:5239";
         private readonly JsonSerializerOptions _opcionesJson;  // Opciones para configurar cómo se serializa/deserializa el JSON
 
         // Constructor: se ejecuta cuando se crea una instancia de esta clase
@@ -133,39 +135,18 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         /// <param name="nombreClave">Nombre del campo clave.</param>
         /// <param name="valorClave">Valor de la clave de la entidad a actualizar.</param>
         /// <param name="entidad">Datos actualizados de la entidad.</param>
-        public async Task<bool> ActualizarAsync(
-            string nombreProyecto, 
-            string nombreTabla, 
-            string nombreClave, 
-            string valorClave, 
-            Dictionary<string, object> entidad)
+        public async Task<bool> ActualizarTipoActorAsync(string nombreProyecto, string nombreTabla, string nombreClave, string valorClave, Dictionary<string, object?> datos)
         {
-            // Esta función actualiza una entidad existente en la base de datos
-            // Recibe la información de la clave primaria y los datos actualizados
-            // Devuelve true si la operación fue exitosa, false en caso contrario
-            
-            try
-            {
-                // Construir la URL incluyendo la clave primaria para identificar la entidad a actualizar
-                var url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";
-                
-                // Preparar los datos actualizados para enviarlos en formato JSON
-                var contenido = new StringContent(
-                    JsonSerializer.Serialize(entidad),
-                    Encoding.UTF8,
-                    "application/json");
-                
-                // Enviar la petición PUT con los datos actualizados
-                var respuesta = await _clienteHttp.PutAsync(url, contenido);
-                
-                // Devolver true si la respuesta indica éxito, false en caso contrario
-                return respuesta.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al actualizar entidad: {ex.Message}");
-                return false;  // Devolver false si ocurre un error
-            }
+            // Construye la URL dinámica
+            string url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";
+
+            // Serializa los datos a JSON
+            var contenido = new StringContent(JsonSerializer.Serialize(datos), Encoding.UTF8, "application/json");
+
+            // Realiza la solicitud PUT
+            var respuesta = await _clienteHttp.PutAsync(url, contenido);
+
+            return respuesta.IsSuccessStatusCode;
         }
 
         /// <summary>
