@@ -22,13 +22,13 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // Este HttpClient se inicializa con la dirección base de la API genérica
 // La URL base debe terminar con una barra "/" para que las rutas relativas funcionen correctamente
 builder.Services.AddScoped(sp => new HttpClient { 
-    BaseAddress = new Uri("http://localhost:5178/api/") //modificar aquí
+    BaseAddress = new Uri("http://localhost:5239/api/") //modificar aquí
 });
 
 // Registra el servicio genérico de entidades en el contenedor de inyección de dependencias
 // Esto permitirá inyectar el servicio en cualquier componente Blazor que lo necesite
 // El servicio maneja todas las operaciones CRUD con cualquier tabla de la base de datos
-builder.Services.AddScoped<ServicioEntidad>();
+builder.Services.AddScoped<ServicioTipoActor>();
 
 // Construye la aplicación a partir de la configuración establecida en el builder y la ejecuta
 // builder.Build() crea la instancia de WebAssemblyHost con todas las configuraciones definidas
