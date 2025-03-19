@@ -1,0 +1,266 @@
+<!--  Define la ruta URL para acceder a esta página (será accesible en /productos)-->
+@page "/represen-visual"  
+<!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
+@using System.Collections.Generic  
+@using System.Text.Json  
+<!--  Importa el espacio de nombres para trabajar con JSON -->
+@using Services  
+<!--  Importa el espacio de nombres donde se encuentra el ServicioEntidad-->
+@inject ServicioRepresenVisual servicioRepresenVisual
+<!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
+@inject NavigationManager navegacionManager  
+<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
+
+<PageTitle>Lista de represen visual</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
+
+<h1>represen visual</h1>  <!-- Encabezado principal de la página -->
+
+<div class="mb-3">
+    <input class="form-control" @bind="nuevoNombre" placeholder="Represen visual" />
+    <button class="btn btn-success mt-2" @onclick="CrearRepresenVisual">Crear</button>
+</div>
+
+<!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
+<!-- Si no está cargando pero no hay productos o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay productos para mostrar, muestra la tabla -->
+@if (cargando)
+{
+    <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
+}
+else if (represenVisuales == null || represenVisuales.Count == 0)
+{
+    <p>No hay Represen visual disponibles.</p>  <!-- Mensaje cuando no hay productos para mostrar -->
+}
+else
+{
+    <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var represenVisual in represenVisuales)
+            {
+                var id = ObtenerValor(represenVisual, "id");
+                var nombre = ObtenerValor(represenVisual, "nombre");
+
+                <tr>
+                    <td>@id</td>
+                    <td>
+                        @if (editandoId == id)
+                        {
+                            <input @bind="nombreEditado" class="form-control" />
+                        }
+                        else
+                        {
+                            @nombre
+                        }
+                    </td>
+                    <td>
+                        @if (editandoId == id)
+                        {
+                            <button class="btn btn-sm btn-success me-1" @onclick="() => GuardarEdicion(id)">Guardar</button>
+                            <button class="btn btn-sm btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarRepresenVisual(id)">Eliminar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+}
+
+<!-- Mostrar mensaje de error si existe -->
+@if (errorMensaje != null)
+{
+    <div class="alert alert-danger">
+        Error: @errorMensaje
+    </div>
+}
+
+@code {
+    // Lista para almacenar los productos que se obtienen de la API
+    private List<Dictionary<string, object>> represenVisuales = new List<Dictionary<string, object>>();
+    
+    // Bandera para indicar si se están cargando los datos
+    private bool cargando = true;
+    
+    // Variable para almacenar mensajes de error
+    private string? errorMensaje = null;
+
+    // Variables para crear
+    private string nuevoNombre = string.Empty;
+
+    // Variables para editar
+    private string? editandoId = null;
+    private string nombreEditado = string.Empty;
+    
+    // Constantes para los parámetros de la API
+    private const string PROYECTO = "csharpapigenerica";
+    private const string TABLA = "represenvisual";
+
+    // Método que se ejecuta cuando se inicializa el componente
+    protected override async Task OnInitializedAsync()
+    {
+        // Llamar al método para cargar los productos
+        await CargarRepresenVisual();
+    }
+
+    // Método asíncrono para cargar los productos desde la API
+    private async Task CargarRepresenVisual()
+    {
+        // Establecer la bandera de carga en verdadero
+        cargando = true;
+        // Limpiar cualquier mensaje de error previo
+        errorMensaje = null;
+        
+        try
+        {
+            // Obtener todos los productos usando el servicio de entidades
+            var resultado = await servicioRepresenVisual.ObtenerTodosAsync(PROYECTO, TABLA);
+            
+            // Si la lista no es null, asignarla a la variable productos
+            if (resultado != null)
+            {
+                represenVisuales = resultado;
+            }
+            else
+            {
+                // Si es null, inicializar como lista vacía para evitar errores
+                represenVisuales = new List<Dictionary<string, object>>();
+            }
+        }
+        catch (Exception ex)
+        {
+            // En caso de error, guardar el mensaje y crear lista vacía
+            errorMensaje = $"Error al cargar productos: {ex.Message}";
+            represenVisuales = new List<Dictionary<string, object>>();
+        }
+        finally
+        {
+            // Establecer la bandera de carga en falso una vez finalizada la operación
+            cargando = false;
+        }
+    }
+
+    // Método para obtener un valor específico de un diccionario de manera segura
+    private string ObtenerValor(Dictionary<string, object> diccionario, string clave)
+    {
+        // Verificar si el diccionario es null
+        if (diccionario == null)
+            return string.Empty;
+            
+        // Verificar si el diccionario contiene la clave
+        if (diccionario.TryGetValue(clave, out var valor))
+        {
+            // Devolver el valor como cadena, o cadena vacía si es null
+            return valor?.ToString() ?? string.Empty;
+        }
+        
+        // Si la clave no existe, devolver cadena vacía
+        return string.Empty;
+    }
+
+    // Crear nuevo represen visual
+    private async Task CrearRepresenVisual()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevoNombre))
+        {
+            var nuevoRepresenVisual = new Dictionary<string, object>
+        {
+            { "nombre", nuevoNombre }
+        };
+
+        var exito = await servicioRepresenVisual.CrearAsync(PROYECTO, TABLA, nuevoRepresenVisual);
+        if (exito)
+        {
+            await CargarRepresenVisual();
+            nuevoNombre = string.Empty;
+        }
+        else
+        {
+            errorMensaje = "No se pudo crear el represen visual.";
+        }
+    }
+}
+
+    // Iniciar edición
+    private void EmpezarEdicion(string id, string nombreActual)
+    {
+        editandoId = id;
+        nombreEditado = nombreActual;
+    }
+
+    // Cancelar edición
+    private void CancelarEdicion()
+    {
+    editandoId = null;
+    nombreEditado = string.Empty;
+    }
+
+    // Guardar cambios de edición
+    private async Task GuardarEdicion(string id)
+    {
+        try
+        {
+            var datos = new Dictionary<string, object?>
+        {
+            { "nombre", nombreEditado } // asegúrate de usar el nombre correcto del campo
+        };
+
+        var exito = await servicioRepresenVisual.ActualizarRepresenVisualAsync(
+            PROYECTO, 
+            TABLA, 
+            "id",        // nombre de la columna clave
+            id,          // valor de la clave
+            datos
+        );
+
+        if (exito)
+        {
+            await CargarRepresenVisual();
+            CancelarEdicion();
+        }
+        else
+        {
+            errorMensaje = "No se pudo actualizar el represen visual.";
+        }
+    }
+    catch (Exception ex)
+    {
+        errorMensaje = $"Error al actualizar: {ex.Message}";
+    }
+}
+
+    // Eliminar
+    private async Task EliminarRepresenVisual(string id)
+    {
+        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el represen visual con ID {id}?");
+        if (confirmado)
+        {
+            var exito = await servicioRepresenVisual.EliminarAsync(PROYECTO, TABLA, "id", id);
+            if (exito)
+            {
+                await CargarRepresenVisual();
+            }
+            else
+            {
+                errorMensaje = "No se pudo eliminar el represen visual.";
+            }
+        }
+    }
+
+    // Inyectar JavaScript runtime para mostrar confirmaciones
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    }
