@@ -30,6 +30,8 @@ builder.Services.AddScoped(sp => new HttpClient {
 // El servicio maneja todas las operaciones CRUD con cualquier tabla de la base de datos
 
 builder.Services.AddScoped<ServicioUnidadMedicion>();
+builder.Services.AddScoped<ServicioTipoIndicador>();
+
 
 // Construye la aplicación a partir de la configuración establecida en el builder y la ejecuta
 // builder.Build() crea la instancia de WebAssemblyHost con todas las configuraciones definidas
