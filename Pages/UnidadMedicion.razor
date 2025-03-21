@@ -1,0 +1,121 @@
+@page "/unidadmedicion"
+@inject FrontBlazor.Services.ServicioUnidadMedicion ServicioUnidadMedicion
+
+<h3>Gestión de Unidades de Medición</h3>
+
+@if (unidadesMedicion == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var unidad in unidadesMedicion)
+            {
+                <tr>
+                    <td>@(unidad.TryGetValue("id", out var id) ? id?.ToString() ?? "" : "")</td>
+                    <td>@(unidad.TryGetValue("descripcion", out var descripcion) ? descripcion?.ToString() ?? "" : "")</td>
+                    <td>
+                        <button class="btn btn-warning" @onclick="() => Editar(unidad)">Editar</button>
+                        <button class="btn btn-danger" @onclick="() => Eliminar(unidad)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h4>@(editando ? "Editar" : "Nueva") Unidad de Medición</h4>
+<input @bind="descripcionUnidad" placeholder="Descripción" class="form-control" />
+<button class="btn btn-primary" @onclick="Guardar">Guardar</button>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert @(exito ? "alert-success" : "alert-danger")">@mensaje</div>
+}
+
+@code {
+    private List<Dictionary<string, object>> unidadesMedicion = new();
+    private Dictionary<string, object> nuevaUnidad = new();
+    private bool editando = false;
+    private string? idActual = null;
+    private string? mensaje = null;
+    private bool exito = true;
+
+    private string descripcionUnidad
+    {
+        get => nuevaUnidad.TryGetValue("descripcion", out var desc) ? desc?.ToString() ?? "" : "";
+        set => nuevaUnidad["descripcion"] = value;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        unidadesMedicion = await ServicioUnidadMedicion.ObtenerTodosAsync() ?? new List<Dictionary<string, object>>();
+    }
+
+    private void Editar(Dictionary<string, object> unidad)
+    {
+        idActual = unidad.TryGetValue("id", out var id) ? id?.ToString() ?? "" : "";
+        nuevaUnidad = new Dictionary<string, object>(unidad);
+        editando = true;
+    }
+
+    private async Task Guardar()
+    {
+        bool resultado;
+        if (editando)
+        {
+            resultado = await ServicioUnidadMedicion.ActualizarAsync(idActual!, nuevaUnidad);
+        }
+        else
+        {
+            resultado = await ServicioUnidadMedicion.CrearAsync(nuevaUnidad);
+        }
+
+        if (resultado)
+        {
+            mensaje = "Operación exitosa";
+            exito = true;
+            await CargarDatos();
+            nuevaUnidad = new();
+            editando = false;
+        }
+        else
+        {
+            mensaje = "Error al guardar";
+            exito = false;
+        }
+    }
+
+    private async Task Eliminar(Dictionary<string, object> unidad)
+    {
+        if (unidad.TryGetValue("id", out var idObj) && idObj is not null)
+        {
+            string id = idObj.ToString()!;
+            if (!string.IsNullOrEmpty(id) && await ServicioUnidadMedicion.EliminarAsync(id))
+            {
+                mensaje = "Unidad eliminada correctamente";
+                exito = true;
+                await CargarDatos();
+            }
+            else
+            {
+                mensaje = "Error al eliminar";
+                exito = false;
+            }
+        }
+    }
+}
