@@ -1,15 +1,15 @@
-<!--  Define la ruta URL para acceder a esta página (será accesible en /productos)-->
+<!--  Define la ruta URL para acceder a esta página (será accesible en /represen-visual)-->
 @page "/represen-visual"  
 <!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
 @using System.Collections.Generic  
 @using System.Text.Json  
 <!--  Importa el espacio de nombres para trabajar con JSON -->
 @using Services  
-<!--  Importa el espacio de nombres donde se encuentra el ServicioEntidad-->
+<!--  Importa el espacio de nombres donde se encuentra el Servicio Represen visual-->
 @inject ServicioRepresenVisual servicioRepresenVisual
-<!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
+<!--  Inyecta el servicio que se comunicará con la API Servicio Represen visual -->
 @inject NavigationManager navegacionManager  
-<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
+<!--  Inyecta el servicio para manejar la navegación entre páginas Servicio Represen visual-->
 
 <PageTitle>Lista de represen visual</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
@@ -21,15 +21,15 @@
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
-<!-- Si no está cargando pero no hay productos o la lista es nula, muestra un mensaje informativo -->
-<!-- Si hay productos para mostrar, muestra la tabla -->
+<!-- Si no está cargando pero no hay represen visual o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay represen visual para mostrar, muestra la tabla -->
 @if (cargando)
 {
     <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
 }
 else if (represenVisuales == null || represenVisuales.Count == 0)
 {
-    <p>No hay Represen visual disponibles.</p>  <!-- Mensaje cuando no hay productos para mostrar -->
+    <p>No hay Represen visual disponibles.</p>  <!-- Mensaje cuando no hay represen visual para mostrar -->
 }
 else
 {
@@ -49,19 +49,22 @@ else
                 var nombre = ObtenerValor(represenVisual, "nombre");
 
                 <tr>
+                    <!-- Muestra el ID del elemento -->
                     <td>@id</td>
                     <td>
-                        @if (editandoId == id)
+                        @if (editandoId == id) // estamos editando este elemento específico
                         {
+                            <!-- Muestra un input para editar el nombre -->
                             <input @bind="nombreEditado" class="form-control" />
                         }
                         else
                         {
+                            <!-- Muestra el nombre tal cual si no se está editando -->
                             @nombre
                         }
                     </td>
                     <td>
-                        @if (editandoId == id)
+                        @if (editandoId == id) // Si el ID que estamos editando es el mismo que esta fila
                         {
                             <button class="btn btn-sm btn-success me-1" @onclick="() => GuardarEdicion(id)">Guardar</button>
                             <button class="btn btn-sm btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
@@ -112,11 +115,11 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los productos
+        // Llamar al método para cargar los represen visual
         await CargarRepresenVisual();
     }
 
-    // Método asíncrono para cargar los productos desde la API
+    // Método asíncrono para cargar los represen visual desde la API
     private async Task CargarRepresenVisual()
     {
         // Establecer la bandera de carga en verdadero
@@ -126,10 +129,10 @@ else
         
         try
         {
-            // Obtener todos los productos usando el servicio de entidades
+            // Obtener todos los represen visual usando el servicio de entidades
             var resultado = await servicioRepresenVisual.ObtenerTodosAsync(PROYECTO, TABLA);
             
-            // Si la lista no es null, asignarla a la variable productos
+            // Si la lista no es null, asignarla a la variable represen visual
             if (resultado != null)
             {
                 represenVisuales = resultado;
@@ -174,18 +177,21 @@ else
     // Crear nuevo represen visual
     private async Task CrearRepresenVisual()
     {
+        // Verifica que el nombre no esté vacío ni sea solo espacios
         if (!string.IsNullOrWhiteSpace(nuevoNombre))
         {
+            // Crea un nuevo diccionario con el nombre ingresado
             var nuevoRepresenVisual = new Dictionary<string, object>
         {
             { "nombre", nuevoNombre }
         };
 
+        // Llama al servicio para crear el nuevo elemento en la base de datos
         var exito = await servicioRepresenVisual.CrearAsync(PROYECTO, TABLA, nuevoRepresenVisual);
         if (exito)
         {
-            await CargarRepresenVisual();
-            nuevoNombre = string.Empty;
+            await CargarRepresenVisual(); // Recarga los datos para mostrar el nuevo elemento
+            nuevoNombre = string.Empty; // limpiamos el campo del formulario para ingresar mas nombres
         }
         else
         {
@@ -215,9 +221,10 @@ else
         {
             var datos = new Dictionary<string, object?>
         {
-            { "nombre", nombreEditado } // asegúrate de usar el nombre correcto del campo
+            { "nombre", nombreEditado } 
         };
 
+        // Llama al servicio para actualizar el registro en la base de datos
         var exito = await servicioRepresenVisual.ActualizarRepresenVisualAsync(
             PROYECTO, 
             TABLA, 
@@ -228,7 +235,7 @@ else
 
         if (exito)
         {
-            await CargarRepresenVisual();
+            await CargarRepresenVisual(); // Recarga los datos para reflejar los cambios
             CancelarEdicion();
         }
         else

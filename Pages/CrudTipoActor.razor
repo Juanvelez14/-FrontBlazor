@@ -1,15 +1,15 @@
-<!--  Define la ruta URL para acceder a esta página (será accesible en /productos)-->
+<!--  Define la ruta URL para acceder a esta página (será accesible en /tipo-actor)-->
 @page "/tipo-actor"  
 <!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
 @using System.Collections.Generic  
 @using System.Text.Json  
 <!--  Importa el espacio de nombres para trabajar con JSON -->
 @using Services  
-<!--  Importa el espacio de nombres donde se encuentra el ServicioEntidad-->
+<!--  Importa el espacio de nombres donde se encuentra el ServicioTipoActor-->
 @inject ServicioTipoActor servicioTipoActor 
-<!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
+<!--  Inyecta el servicio que se comunicará con la API ServicioTipoActor -->
 @inject NavigationManager navegacionManager  
-<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
+<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioTipoActor-->
 
 <PageTitle>Lista de Tipo actor</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
@@ -21,15 +21,15 @@
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
-<!-- Si no está cargando pero no hay productos o la lista es nula, muestra un mensaje informativo -->
-<!-- Si hay productos para mostrar, muestra la tabla -->
+<!-- Si no está cargando pero no hay Tipo actor o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay tipo actor para mostrar, muestra la tabla -->
 @if (cargando)
 {
     <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
 }
 else if (tiposActor == null || tiposActor.Count == 0)
 {
-    <p>No hay Tipo actores disponibles.</p>  <!-- Mensaje cuando no hay productos para mostrar -->
+    <p>No hay Tipo actores disponibles.</p>  <!-- Mensaje cuando no hay tipo actores para mostrar -->
 }
 else
 {
@@ -49,14 +49,17 @@ else
                 var nombre = ObtenerValor(tipoActor, "nombre");
 
                 <tr>
+                    <!-- Muestra el ID del elemento -->
                     <td>@id</td>
                     <td>
-                        @if (editandoId == id)
+                        @if (editandoId == id) // estamos editando este elemento específico
                         {
+                            <!-- Muestra un input para editar el nombre -->
                             <input @bind="nombreEditado" class="form-control" />
                         }
                         else
                         {
+                            <!-- Muestra el nombre tal cual si no se está editando -->
                             @nombre
                         }
                     </td>
@@ -112,12 +115,12 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los productos
-        await CargarProductos();
+        // Llamar al método para cargar los tipo actor
+        await CargarTipoActor();
     }
 
-    // Método asíncrono para cargar los productos desde la API
-    private async Task CargarProductos()
+    // Método asíncrono para cargar los tipo actor desde la API
+    private async Task CargarTipoActor()
     {
         // Establecer la bandera de carga en verdadero
         cargando = true;
@@ -126,10 +129,10 @@ else
         
         try
         {
-            // Obtener todos los productos usando el servicio de entidades
+            // Obtener todos los tipo actor usando el servicio de entidades
             var resultado = await servicioTipoActor.ObtenerTodosAsync(PROYECTO, TABLA);
             
-            // Si la lista no es null, asignarla a la variable productos
+            // Si la lista no es null, asignarla a la variable tiposActor
             if (resultado != null)
             {
                 tiposActor = resultado;
@@ -174,18 +177,21 @@ else
     // Crear nuevo tipoActor
     private async Task CrearTipoActor()
     {
+        // Verifica que el nombre no esté vacío ni sea solo espacios
         if (!string.IsNullOrWhiteSpace(nuevoNombre))
         {
+            // Crea un nuevo diccionario con el nombre ingresado
             var nuevoTipoActor = new Dictionary<string, object>
         {
             { "nombre", nuevoNombre }
         };
 
+        // Llama al servicio para crear el nuevo elemento en la base de datos
         var exito = await servicioTipoActor.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
         if (exito)
         {
-            await CargarProductos();
-            nuevoNombre = string.Empty;
+            await CargarTipoActor(); // Recarga los datos para mostrar el nuevo elemento
+            nuevoNombre = string.Empty; // limpiamos el campo del formulario para ingresar mas nombres
         }
         else
         {
@@ -215,9 +221,10 @@ else
         {
             var datos = new Dictionary<string, object?>
         {
-            { "nombre", nombreEditado } // asegúrate de usar el nombre correcto del campo
+            { "nombre", nombreEditado } 
         };
 
+        // Llama al servicio para actualizar el registro en la base de datos
         var exito = await servicioTipoActor.ActualizarTipoActorAsync(
             PROYECTO, 
             TABLA, 
@@ -228,7 +235,7 @@ else
 
         if (exito)
         {
-            await CargarProductos();
+            await CargarTipoActor();
             CancelarEdicion();
         }
         else
@@ -251,7 +258,7 @@ else
             var exito = await servicioTipoActor.EliminarAsync(PROYECTO, TABLA, "id", id);
             if (exito)
             {
-                await CargarProductos();
+                await CargarTipoActor();
             }
             else
             {
