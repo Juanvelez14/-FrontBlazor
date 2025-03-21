@@ -1,0 +1,273 @@
+<!--  Define la ruta URL para acceder a esta página (será accesible en /tipo-actor)-->
+@page "/tipo-indicador"  
+<!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
+@using System.Collections.Generic  
+@using System.Text.Json  
+<!--  Importa el espacio de nombres para trabajar con JSON -->
+@using Services  
+<!--  Importa el espacio de nombres donde se encuentra el ServicioTipoActor-->
+@inject ServicioTipoIndicador servicioTipoIndicador
+<!--  Inyecta el servicio que se comunicará con la API ServicioTipoActor -->
+@inject NavigationManager navegacionManager  
+<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioTipoActor-->
+
+<PageTitle>Lista de Tipo actor</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
+
+<h1>Tipo Actor</h1>  <!-- Encabezado principal de la página -->
+
+<div class="mb-3">
+    <input class="form-control" @bind="nuevoNombre" placeholder="Nombre del tipo indicador" />
+    <button class="btn btn-success mt-2" @onclick="CrearTipoIndicador">Crear</button>
+</div>
+
+<!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
+<!-- Si no está cargando pero no hay Tipo actor o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay tipo actor para mostrar, muestra la tabla -->
+@if (cargando)
+{
+    <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
+}
+else if (tiposIndicador == null || tiposIndicador.Count == 0)
+{
+    <p>No hay Tipo indicador disponibles.</p>  <!-- Mensaje cuando no hay tipo actores para mostrar -->
+}
+else
+{
+    <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tipoIndicador in tiposIndicador)
+            {
+                var id = ObtenerValor(tipoIndicador, "id");
+                var nombre = ObtenerValor(tipoIndicador, "nombre");
+
+                <tr>
+                    <!-- Muestra el ID del elemento -->
+                    <td>@id</td>
+                    <td>
+                        @if (editandoId == id) // estamos editando este elemento específico
+                        {
+                            <!-- Muestra un input para editar el nombre -->
+                            <input @bind="nombreEditado" class="form-control" />
+                        }
+                        else
+                        {
+                            <!-- Muestra el nombre tal cual si no se está editando -->
+                            @nombre
+                        }
+                    </td>
+                    <td>
+                        @if (editandoId == id)
+                        {
+                            <button class="btn btn-sm btn-success me-1" @onclick="() => GuardarEdicion(id)">Guardar</button>
+                            <button class="btn btn-sm btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarTipoIndicador(id)">Eliminar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+}
+
+<!-- Mostrar mensaje de error si existe -->
+@if (errorMensaje != null)
+{
+    <div class="alert alert-danger">
+        Error: @errorMensaje
+    </div>
+}
+
+@code {
+    // Lista para almacenar los productos que se obtienen de la API
+    private List<Dictionary<string, object>> tiposIndicador = new List<Dictionary<string, object>>();
+    
+    // Bandera para indicar si se están cargando los datos
+    private bool cargando = true;
+    
+    // Variable para almacenar mensajes de error
+    private string? errorMensaje = null;
+
+    // Variables para crear
+    private string nuevoNombre = string.Empty;
+
+    // Variables para editar
+    private string? editandoId = null;
+    private string nombreEditado = string.Empty;
+    
+    // Constantes para los parámetros de la API
+    private const string PROYECTO = "csharpapigenerica";
+    private const string TABLA = "tipoindicador";
+
+    // Método que se ejecuta cuando se inicializa el componente
+    protected override async Task OnInitializedAsync()
+    {
+        // Llamar al método para cargar los tipo actor
+        await CargarTipoIndicador();
+    }
+
+    // Método asíncrono para cargar los tipo actor desde la API
+    private async Task CargarTipoIndicador()
+    {
+        // Establecer la bandera de carga en verdadero
+        cargando = true;
+        // Limpiar cualquier mensaje de error previo
+        errorMensaje = null;
+        
+        try
+        {
+            // Obtener todos los tipo actor usando el servicio de entidades
+            var resultado = await servicioTipoIndicador.ObtenerTodosAsync(PROYECTO, TABLA);
+            
+            // Si la lista no es null, asignarla a la variable tiposActor
+            if (resultado != null)
+            {
+                tiposIndicador = resultado;
+            }
+            else
+            {
+                // Si es null, inicializar como lista vacía para evitar errores
+                tiposIndicador = new List<Dictionary<string, object>>();
+            }
+        }
+        catch (Exception ex)
+        {
+            // En caso de error, guardar el mensaje y crear lista vacía
+            errorMensaje = $"Error al cargar productos: {ex.Message}";
+            tiposIndicador = new List<Dictionary<string, object>>();
+        }
+        finally
+        {
+            // Establecer la bandera de carga en falso una vez finalizada la operación
+            cargando = false;
+        }
+    }
+
+    // Método para obtener un valor específico de un diccionario de manera segura
+    private string ObtenerValor(Dictionary<string, object> diccionario, string clave)
+    {
+        // Verificar si el diccionario es null
+        if (diccionario == null)
+            return string.Empty;
+            
+        // Verificar si el diccionario contiene la clave
+        if (diccionario.TryGetValue(clave, out var valor))
+        {
+            // Devolver el valor como cadena, o cadena vacía si es null
+            return valor?.ToString() ?? string.Empty;
+        }
+        
+        // Si la clave no existe, devolver cadena vacía
+        return string.Empty;
+    }
+
+    // Crear nuevo tipoActor
+    private async Task CrearTipoIndicador()
+    {
+        // Verifica que el nombre no esté vacío ni sea solo espacios
+        if (!string.IsNullOrWhiteSpace(nuevoNombre))
+        {
+            // Crea un nuevo diccionario con el nombre ingresado
+            var nuevoTipoActor = new Dictionary<string, object>
+        {
+            { "nombre", nuevoNombre }
+        };
+
+        // Llama al servicio para crear el nuevo elemento en la base de datos
+        var exito = await servicioTipoIndicador.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
+        if (exito)
+        {
+            await CargarTipoIndicador(); // Recarga los datos para mostrar el nuevo elemento
+            nuevoNombre = string.Empty; // limpiamos el campo del formulario para ingresar mas nombres
+        }
+        else
+        {
+            errorMensaje = "No se pudo crear el tipo actor.";
+        }
+    }
+}
+
+    // Iniciar edición
+    private void EmpezarEdicion(string id, string nombreActual)
+    {
+        editandoId = id;
+        nombreEditado = nombreActual;
+    }
+
+    // Cancelar edición
+    private void CancelarEdicion()
+    {
+    editandoId = null;
+    nombreEditado = string.Empty;
+    }
+
+    // Guardar cambios de edición
+    private async Task GuardarEdicion(string id)
+    {
+        try
+        {
+            var datos = new Dictionary<string, object?>
+        {
+            { "nombre", nombreEditado } 
+        };
+
+        // Llama al servicio para actualizar el registro en la base de datos
+        var exito = await servicioTipoIndicador.ActualizarTipoIndicadorAsync(
+            PROYECTO, 
+            TABLA, 
+            "id",        // nombre de la columna clave
+            id,          // valor de la clave
+            datos
+        );
+
+        if (exito)
+        {
+            await CargarTipoIndicador();
+            CancelarEdicion();
+        }
+        else
+        {
+            errorMensaje = "No se pudo actualizar el tipo actor.";
+        }
+    }
+    catch (Exception ex)
+    {
+        errorMensaje = $"Error al actualizar: {ex.Message}";
+    }
+}
+
+    // Eliminar
+    private async Task EliminarTipoIndicador(string id)
+    {
+        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el tipo actor con ID {id}?");
+        if (confirmado)
+        {
+            var exito = await servicioTipoIndicador.EliminarAsync(PROYECTO, TABLA, "id", id);
+            if (exito)
+            {
+                await CargarTipoIndicador();
+            }
+            else
+            {
+                errorMensaje = "No se pudo eliminar el tipo actor.";
+            }
+        }
+    }
+
+    // Inyectar JavaScript runtime para mostrar confirmaciones
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    }
