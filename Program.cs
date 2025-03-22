@@ -29,8 +29,8 @@ builder.Services.AddScoped(sp => new HttpClient {
 // Esto permitirá inyectar el servicio en cualquier componente Blazor que lo necesite
 // El servicio maneja todas las operaciones CRUD con cualquier tabla de la base de datos
 
-builder.Services.AddScoped<ServicioUnidadMedicion>();
-builder.Services.AddScoped<ServicioTipoIndicador>();
+builder.Services.AddScoped<ServicioEntidad>();
+
 
 
 // Construye la aplicación a partir de la configuración establecida en el builder y la ejecuta
