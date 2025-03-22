@@ -1,35 +1,35 @@
-<!--  Define la ruta URL para acceder a esta página (será accesible en /represen-visual)-->
-@page "/represen-visual"  
+<!--  Define la ruta URL para acceder a esta página (será accesible en /Unidad-Medicion)-->
+@page "/Unidad-Medicion"  
 <!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
 @using System.Collections.Generic  
 @using System.Text.Json  
 <!--  Importa el espacio de nombres para trabajar con JSON -->
 @using Services  
-<!--  Importa el espacio de nombres donde se encuentra el Servicio Represen visual-->
-@inject ServicioEntidad servicioEntidad
-<!--  Inyecta el servicio que se comunicará con la API Servicio Represen visual -->
+<!--  Importa el espacio de nombres donde se encuentra el ServicioEntidad-->
+@inject ServicioEntidad servicioEntidad 
+<!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
 @inject NavigationManager navegacionManager  
-<!--  Inyecta el servicio para manejar la navegación entre páginas Servicio Represen visual-->
+<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
 
-<PageTitle>Lista de represen visual</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
+<PageTitle>Lista de Unidad Medicion</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
-<h1>represen visual</h1>  <!-- Encabezado principal de la página -->
+<h1>Unidad Medicion</h1>  <!-- Encabezado principal de la página -->
 
 <div class="mb-3">
-    <input class="form-control" @bind="nuevoNombre" placeholder="Represen visual" />
-    <button class="btn btn-success mt-2" @onclick="CrearRepresenVisual">Crear</button>
+    <input class="form-control" @bind="nuevaDescripcion" placeholder="descripcion de Unidad medicion" />
+    <button class="btn btn-success mt-2" @onclick="CrearUnidadMedicion">Crear</button>
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
-<!-- Si no está cargando pero no hay represen visual o la lista es nula, muestra un mensaje informativo -->
-<!-- Si hay represen visual para mostrar, muestra la tabla -->
+<!-- Si no está cargando pero no hay Unidad medicion o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay unidad medicion para mostrar, muestra la tabla -->
 @if (cargando)
 {
     <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
 }
-else if (represenVisuales == null || represenVisuales.Count == 0)
+else if (unidadesMedicion == null || unidadesMedicion.Count == 0)
 {
-    <p>No hay Represen visual disponibles.</p>  <!-- Mensaje cuando no hay represen visual para mostrar -->
+    <p>No hay Unidades Medicion disponibles.</p>  <!-- Mensaje cuando no hay unidad medicion para mostrar -->
 }
 else
 {
@@ -38,15 +38,15 @@ else
         <thead>
             <tr>
                 <th>id</th>
-                <th>Nombre</th>
+                <th>Descripcion</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var represenVisual in represenVisuales)
+            @foreach (var unidadMedicion in unidadesMedicion)
             {
-                var id = ObtenerValor(represenVisual, "id");
-                var nombre = ObtenerValor(represenVisual, "nombre");
+                var id = ObtenerValor(unidadMedicion, "id");
+                var descripcion = ObtenerValor(unidadMedicion, "descripcion");
 
                 <tr>
                     <!-- Muestra el ID del elemento -->
@@ -54,25 +54,25 @@ else
                     <td>
                         @if (editandoId == id) // estamos editando este elemento específico
                         {
-                            <!-- Muestra un input para editar el nombre -->
-                            <input @bind="nombreEditado" class="form-control" />
+                            <!-- Muestra un input para editar la descripcion -->
+                            <input @bind="descripcionEditada" class="form-control" />
                         }
                         else
                         {
-                            <!-- Muestra el nombre tal cual si no se está editando -->
-                            @nombre
+                            <!-- Muestra la descripcion tal cual si no se está editando -->
+                            @descripcion
                         }
                     </td>
                     <td>
-                        @if (editandoId == id) // Si el ID que estamos editando es el mismo que esta fila
+                        @if (editandoId == id)
                         {
                             <button class="btn btn-sm btn-success me-1" @onclick="() => GuardarEdicion(id)">Guardar</button>
                             <button class="btn btn-sm btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
                         }
                         else
                         {
-                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarRepresenVisual(id)">Eliminar</button>
+                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, descripcion)">Editar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarUnidadMedicion(id)">Eliminar</button>
                         }
                     </td>
                 </tr>
@@ -92,8 +92,8 @@ else
 }
 
 @code {
-    // Lista para almacenar los represen visual que se obtienen de la API
-    private List<Dictionary<string, object>> represenVisuales = new List<Dictionary<string, object>>();
+    // Lista para almacenar los unidad medicion que se obtienen de la API
+    private List<Dictionary<string, object>> unidadesMedicion = new List<Dictionary<string, object>>();
     
     // Bandera para indicar si se están cargando los datos
     private bool cargando = true;
@@ -102,25 +102,25 @@ else
     private string? errorMensaje = null;
 
     // Variables para crear
-    private string nuevoNombre = string.Empty;
+    private string nuevaDescripcion = string.Empty;
 
     // Variables para editar
     private string? editandoId = null;
-    private string nombreEditado = string.Empty;
+    private string descripcionEditada = string.Empty;
     
     // Constantes para los parámetros de la API
     private const string PROYECTO = "csharpapigenerica";
-    private const string TABLA = "represenvisual";
+    private const string TABLA = "unidadmedicion";
 
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los represen visual
-        await CargarRepresenVisual();
+        // Llamar al método para cargar los unidad medicion
+        await CargarUnidadMedicion();
     }
 
-    // Método asíncrono para cargar los represen visual desde la API
-    private async Task CargarRepresenVisual()
+    // Método asíncrono para cargar los unidad medicion desde la API
+    private async Task CargarUnidadMedicion()
     {
         // Establecer la bandera de carga en verdadero
         cargando = true;
@@ -129,25 +129,25 @@ else
         
         try
         {
-            // Obtener todos los represen visual usando el servicio de entidades
+            // Obtener todos los unidad medicion usando el servicio de entidades
             var resultado = await servicioEntidad.ObtenerTodosAsync(PROYECTO, TABLA);
             
-            // Si la lista no es null, asignarla a la variable represen visual
+            // Si la lista no es null, asignarla a la variable unidadMedicion
             if (resultado != null)
             {
-                represenVisuales = resultado;
+                unidadesMedicion = resultado;
             }
             else
             {
                 // Si es null, inicializar como lista vacía para evitar errores
-                represenVisuales = new List<Dictionary<string, object>>();
+                unidadesMedicion = new List<Dictionary<string, object>>();
             }
         }
         catch (Exception ex)
         {
             // En caso de error, guardar el mensaje y crear lista vacía
-            errorMensaje = $"Error al cargar represen visual: {ex.Message}";
-            represenVisuales = new List<Dictionary<string, object>>();
+            errorMensaje = $"Error al cargar unidades de medicion: {ex.Message}";
+            unidadesMedicion = new List<Dictionary<string, object>>();
         }
         finally
         {
@@ -174,44 +174,44 @@ else
         return string.Empty;
     }
 
-    // Crear nuevo represen visual
-    private async Task CrearRepresenVisual()
+    // Crear nuevo UnidadMedicion
+    private async Task CrearUnidadMedicion()
     {
         // Verifica que el nombre no esté vacío ni sea solo espacios
-        if (!string.IsNullOrWhiteSpace(nuevoNombre))
+        if (!string.IsNullOrWhiteSpace(nuevaDescripcion))
         {
             // Crea un nuevo diccionario con el nombre ingresado
-            var nuevoRepresenVisual = new Dictionary<string, object>
+            var nuevoTipoActor = new Dictionary<string, object>
         {
-            { "nombre", nuevoNombre }
+            { "descripcion", nuevaDescripcion }
         };
 
         // Llama al servicio para crear el nuevo elemento en la base de datos
-        var exito = await servicioEntidad.CrearAsync(PROYECTO, TABLA, nuevoRepresenVisual);
+        var exito = await servicioEntidad.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
         if (exito)
         {
-            await CargarRepresenVisual(); // Recarga los datos para mostrar el nuevo elemento
-            nuevoNombre = string.Empty; // limpiamos el campo del formulario para ingresar mas nombres
+            await CargarUnidadMedicion(); // Recarga los datos para mostrar el nuevo elemento
+            nuevaDescripcion = string.Empty; // limpiamos el campo del formulario para ingresar mas nombres
         }
         else
         {
-            errorMensaje = "No se pudo crear el represen visual.";
+            errorMensaje = "No se pudo crear la unidad medicion.";
         }
     }
 }
 
     // Iniciar edición
-    private void EmpezarEdicion(string id, string nombreActual)
+    private void EmpezarEdicion(string id, string descripcionActual)
     {
         editandoId = id;
-        nombreEditado = nombreActual;
+        descripcionEditada = descripcionActual;
     }
 
     // Cancelar edición
     private void CancelarEdicion()
     {
     editandoId = null;
-    nombreEditado = string.Empty;
+    descripcionEditada = string.Empty;
     }
 
     // Guardar cambios de edición
@@ -221,7 +221,7 @@ else
         {
             var datos = new Dictionary<string, object?>
         {
-            { "nombre", nombreEditado } 
+            { "descripcion", descripcionEditada } 
         };
 
         // Llama al servicio para actualizar el registro en la base de datos
@@ -235,12 +235,12 @@ else
 
         if (exito)
         {
-            await CargarRepresenVisual(); // Recarga los datos para reflejar los cambios
+            await CargarUnidadMedicion();
             CancelarEdicion();
         }
         else
         {
-            errorMensaje = "No se pudo actualizar el represen visual.";
+            errorMensaje = "No se pudo actualizar la unidad medicion.";
         }
     }
     catch (Exception ex)
@@ -250,19 +250,19 @@ else
 }
 
     // Eliminar
-    private async Task EliminarRepresenVisual(string id)
+    private async Task EliminarUnidadMedicion(string id)
     {
-        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el represen visual con ID {id}?");
+        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar la unidad medicion con ID {id}?");
         if (confirmado)
         {
             var exito = await servicioEntidad.EliminarAsync(PROYECTO, TABLA, "id", id);
             if (exito)
             {
-                await CargarRepresenVisual();
+                await CargarUnidadMedicion();
             }
             else
             {
-                errorMensaje = "No se pudo eliminar el represen visual.";
+                errorMensaje = "No se pudo eliminar la unidad medicion.";
             }
         }
     }

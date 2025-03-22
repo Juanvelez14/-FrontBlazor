@@ -1,19 +1,19 @@
-<!--  Define la ruta URL para acceder a esta página (será accesible en /tipo-actor)-->
+<!--  Define la ruta URL para acceder a esta página (será accesible en /tipo-indicador)-->
 @page "/tipo-indicador"  
 <!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
 @using System.Collections.Generic  
 @using System.Text.Json  
 <!--  Importa el espacio de nombres para trabajar con JSON -->
 @using Services  
-<!--  Importa el espacio de nombres donde se encuentra el ServicioTipoActor-->
-@inject ServicioTipoIndicador servicioTipoIndicador
-<!--  Inyecta el servicio que se comunicará con la API ServicioTipoActor -->
+<!--  Importa el espacio de nombres donde se encuentra el ServicioEntidad-->
+@inject ServicioEntidad servicioEntidad
+<!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
 @inject NavigationManager navegacionManager  
-<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioTipoActor-->
+<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
 
-<PageTitle>Lista de Tipo actor</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
+<PageTitle>Lista de Tipo indicador</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
-<h1>Tipo Actor</h1>  <!-- Encabezado principal de la página -->
+<h1>Tipo indicador</h1>  <!-- Encabezado principal de la página -->
 
 <div class="mb-3">
     <input class="form-control" @bind="nuevoNombre" placeholder="Nombre del tipo indicador" />
@@ -21,15 +21,15 @@
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
-<!-- Si no está cargando pero no hay Tipo actor o la lista es nula, muestra un mensaje informativo -->
-<!-- Si hay tipo actor para mostrar, muestra la tabla -->
+<!-- Si no está cargando pero no hay Tipo indicador o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay tipo indicador para mostrar, muestra la tabla -->
 @if (cargando)
 {
     <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
 }
 else if (tiposIndicador == null || tiposIndicador.Count == 0)
 {
-    <p>No hay Tipo indicador disponibles.</p>  <!-- Mensaje cuando no hay tipo actores para mostrar -->
+    <p>No hay Tipo indicador disponibles.</p>  <!-- Mensaje cuando no hay tipo indicador para mostrar -->
 }
 else
 {
@@ -92,7 +92,7 @@ else
 }
 
 @code {
-    // Lista para almacenar los productos que se obtienen de la API
+    // Lista para almacenar los Tipo indicador que se obtienen de la API
     private List<Dictionary<string, object>> tiposIndicador = new List<Dictionary<string, object>>();
     
     // Bandera para indicar si se están cargando los datos
@@ -115,11 +115,11 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los tipo actor
+        // Llamar al método para cargar los tipo indicador
         await CargarTipoIndicador();
     }
 
-    // Método asíncrono para cargar los tipo actor desde la API
+    // Método asíncrono para cargar los tipo indicador desde la API
     private async Task CargarTipoIndicador()
     {
         // Establecer la bandera de carga en verdadero
@@ -129,10 +129,10 @@ else
         
         try
         {
-            // Obtener todos los tipo actor usando el servicio de entidades
-            var resultado = await servicioTipoIndicador.ObtenerTodosAsync(PROYECTO, TABLA);
+            // Obtener todos los tipo indicador usando el servicio de entidades
+            var resultado = await servicioEntidad.ObtenerTodosAsync(PROYECTO, TABLA);
             
-            // Si la lista no es null, asignarla a la variable tiposActor
+            // Si la lista no es null, asignarla a la variable tiposIndicador
             if (resultado != null)
             {
                 tiposIndicador = resultado;
@@ -146,7 +146,7 @@ else
         catch (Exception ex)
         {
             // En caso de error, guardar el mensaje y crear lista vacía
-            errorMensaje = $"Error al cargar productos: {ex.Message}";
+            errorMensaje = $"Error al cargar Tipo Indicador: {ex.Message}";
             tiposIndicador = new List<Dictionary<string, object>>();
         }
         finally
@@ -174,7 +174,7 @@ else
         return string.Empty;
     }
 
-    // Crear nuevo tipoActor
+    // Crear nuevo tipoIndicador
     private async Task CrearTipoIndicador()
     {
         // Verifica que el nombre no esté vacío ni sea solo espacios
@@ -187,7 +187,7 @@ else
         };
 
         // Llama al servicio para crear el nuevo elemento en la base de datos
-        var exito = await servicioTipoIndicador.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
+        var exito = await servicioEntidad.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
         if (exito)
         {
             await CargarTipoIndicador(); // Recarga los datos para mostrar el nuevo elemento
@@ -195,7 +195,7 @@ else
         }
         else
         {
-            errorMensaje = "No se pudo crear el tipo actor.";
+            errorMensaje = "No se pudo crear el tipo indicador.";
         }
     }
 }
@@ -225,7 +225,7 @@ else
         };
 
         // Llama al servicio para actualizar el registro en la base de datos
-        var exito = await servicioTipoIndicador.ActualizarTipoIndicadorAsync(
+        var exito = await servicioEntidad.ActualizarAsync(
             PROYECTO, 
             TABLA, 
             "id",        // nombre de la columna clave
@@ -240,7 +240,7 @@ else
         }
         else
         {
-            errorMensaje = "No se pudo actualizar el tipo actor.";
+            errorMensaje = "No se pudo actualizar el tipo indicador.";
         }
     }
     catch (Exception ex)
@@ -252,17 +252,17 @@ else
     // Eliminar
     private async Task EliminarTipoIndicador(string id)
     {
-        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el tipo actor con ID {id}?");
+        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el tipo indicador con ID {id}?");
         if (confirmado)
         {
-            var exito = await servicioTipoIndicador.EliminarAsync(PROYECTO, TABLA, "id", id);
+            var exito = await servicioEntidad.EliminarAsync(PROYECTO, TABLA, "id", id);
             if (exito)
             {
                 await CargarTipoIndicador();
             }
             else
             {
-                errorMensaje = "No se pudo eliminar el tipo actor.";
+                errorMensaje = "No se pudo eliminar el tipo indicador.";
             }
         }
     }

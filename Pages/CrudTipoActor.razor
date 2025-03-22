@@ -5,11 +5,11 @@
 @using System.Text.Json  
 <!--  Importa el espacio de nombres para trabajar con JSON -->
 @using Services  
-<!--  Importa el espacio de nombres donde se encuentra el ServicioTipoActor-->
-@inject ServicioTipoActor servicioTipoActor 
-<!--  Inyecta el servicio que se comunicará con la API ServicioTipoActor -->
+<!--  Importa el espacio de nombres donde se encuentra el ServicioEntidad-->
+@inject ServicioEntidad servicioEntidad 
+<!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
 @inject NavigationManager navegacionManager  
-<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioTipoActor-->
+<!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
 
 <PageTitle>Lista de Tipo actor</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
@@ -92,7 +92,7 @@ else
 }
 
 @code {
-    // Lista para almacenar los productos que se obtienen de la API
+    // Lista para almacenar los tipo actor que se obtienen de la API
     private List<Dictionary<string, object>> tiposActor = new List<Dictionary<string, object>>();
     
     // Bandera para indicar si se están cargando los datos
@@ -130,7 +130,7 @@ else
         try
         {
             // Obtener todos los tipo actor usando el servicio de entidades
-            var resultado = await servicioTipoActor.ObtenerTodosAsync(PROYECTO, TABLA);
+            var resultado = await servicioEntidad.ObtenerTodosAsync(PROYECTO, TABLA);
             
             // Si la lista no es null, asignarla a la variable tiposActor
             if (resultado != null)
@@ -146,7 +146,7 @@ else
         catch (Exception ex)
         {
             // En caso de error, guardar el mensaje y crear lista vacía
-            errorMensaje = $"Error al cargar productos: {ex.Message}";
+            errorMensaje = $"Error al cargar Tipo Actor: {ex.Message}";
             tiposActor = new List<Dictionary<string, object>>();
         }
         finally
@@ -187,7 +187,7 @@ else
         };
 
         // Llama al servicio para crear el nuevo elemento en la base de datos
-        var exito = await servicioTipoActor.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
+        var exito = await servicioEntidad.CrearAsync(PROYECTO, TABLA, nuevoTipoActor);
         if (exito)
         {
             await CargarTipoActor(); // Recarga los datos para mostrar el nuevo elemento
@@ -225,7 +225,7 @@ else
         };
 
         // Llama al servicio para actualizar el registro en la base de datos
-        var exito = await servicioTipoActor.ActualizarTipoActorAsync(
+        var exito = await servicioEntidad.ActualizarAsync(
             PROYECTO, 
             TABLA, 
             "id",        // nombre de la columna clave
@@ -255,7 +255,7 @@ else
         var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el tipo actor con ID {id}?");
         if (confirmado)
         {
-            var exito = await servicioTipoActor.EliminarAsync(PROYECTO, TABLA, "id", id);
+            var exito = await servicioEntidad.EliminarAsync(PROYECTO, TABLA, "id", id);
             if (exito)
             {
                 await CargarTipoActor();
