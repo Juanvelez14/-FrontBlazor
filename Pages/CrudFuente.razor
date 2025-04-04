@@ -1,35 +1,35 @@
-<!--  Define la ruta URL para acceder a esta página (será accesible en /represen-visual)-->
-@page "/represen-visual"  
+<!--  Define la ruta URL para acceder a esta página (será accesible en /fuente)-->
+@page "/fuente"  
 <!--  Importa el espacio de nombres para trabajar con listas y colecciones -->
 @using System.Collections.Generic  
 @using System.Text.Json  
 <!--  Importa el espacio de nombres para trabajar con JSON -->
 @using Services  
-<!--  Importa el espacio de nombres donde se encuentra el Servicio Represen visual-->
+<!--  Importa el espacio de nombres donde se encuentra el Servicio entidad-->
 @inject ServicioEntidad servicioEntidad
-<!--  Inyecta el servicio que se comunicará con la API Servicio Represen visual -->
+<!--  Inyecta el servicio que se comunicará con la API Servicio entidad -->
 @inject NavigationManager navegacionManager  
 <!--  Inyecta el servicio para manejar la navegación entre páginas Servicio entidad-->
 
-<PageTitle>Lista de represen visual</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
+<PageTitle>Lista de fuentes</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
-<h1>represen visual</h1>  <!-- Encabezado principal de la página -->
+<h1>Fuente</h1>  <!-- Encabezado principal de la página -->
 
 <div class="mb-3">
-    <input class="form-control" @bind="nuevoNombre" placeholder="Represen visual" />
-    <button class="btn btn-success mt-2" @onclick="CrearRepresenVisual">Crear</button>
+    <input class="form-control" @bind="nuevoNombre" placeholder="fuente" />
+    <button class="btn btn-success mt-2" @onclick="CrearFuente">Crear</button>
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
-<!-- Si no está cargando pero no hay represen visual o la lista es nula, muestra un mensaje informativo -->
-<!-- Si hay represen visual para mostrar, muestra la tabla -->
+<!-- Si no está cargando pero no hay fuentes o la lista es nula, muestra un mensaje informativo -->
+<!-- Si hay fuentes para mostrar, muestra la tabla -->
 @if (cargando)
 {
     <p><em>Cargando...</em></p>  <!-- Mensaje de carga con énfasis (cursiva) -->
 }
-else if (represenVisuales == null || represenVisuales.Count == 0)
+else if (fuentes == null || fuentes.Count == 0)
 {
-    <p>No hay Represen visual disponibles.</p>  <!-- Mensaje cuando no hay represen visual para mostrar -->
+    <p>No hay fuentes disponibles.</p>  <!-- Mensaje cuando no hay fuentes para mostrar -->
 }
 else
 {
@@ -43,10 +43,10 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var represenVisual in represenVisuales)
+            @foreach (var fuente in fuentes)
             {
-                var id = ObtenerValor(represenVisual, "id");
-                var nombre = ObtenerValor(represenVisual, "nombre");
+                var id = ObtenerValor(fuente, "id");
+                var nombre = ObtenerValor(fuente, "nombre");
 
                 <tr>
                     <!-- Muestra el ID del elemento -->
@@ -72,7 +72,7 @@ else
                         else
                         {
                             <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarRepresenVisual(id)">Eliminar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarFuente(id)">Eliminar</button>
                         }
                     </td>
                 </tr>
@@ -92,8 +92,8 @@ else
 }
 
 @code {
-    // Lista para almacenar los represen visual que se obtienen de la API
-    private List<Dictionary<string, object>> represenVisuales = new List<Dictionary<string, object>>();
+    // Lista para almacenar los fuentes que se obtienen de la API
+    private List<Dictionary<string, object>> fuentes = new List<Dictionary<string, object>>();
     
     // Bandera para indicar si se están cargando los datos
     private bool cargando = true;
@@ -110,17 +110,17 @@ else
     
     // Constantes para los parámetros de la API
     private const string PROYECTO = "csharpapigenerica";
-    private const string TABLA = "represenvisual";
+    private const string TABLA = "fuente";
 
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los represen visual
-        await CargarRepresenVisual();
+        // Llamar al método para cargar las fuentes
+        await CargarFuente();
     }
 
-    // Método asíncrono para cargar los represen visual desde la API
-    private async Task CargarRepresenVisual()
+    // Método asíncrono para cargar las fuentes desde la API
+    private async Task CargarFuente()
     {
         // Establecer la bandera de carga en verdadero
         cargando = true;
@@ -129,25 +129,25 @@ else
         
         try
         {
-            // Obtener todos los represen visual usando el servicio de entidades
+            // Obtener todos las fuentes usando el servicio de entidades
             var resultado = await servicioEntidad.ObtenerTodosAsync(PROYECTO, TABLA);
             
-            // Si la lista no es null, asignarla a la variable represen visual
+            // Si la lista no es null, asignarla a la variable fuente
             if (resultado != null)
             {
-                represenVisuales = resultado;
+                fuentes = resultado;
             }
             else
             {
                 // Si es null, inicializar como lista vacía para evitar errores
-                represenVisuales = new List<Dictionary<string, object>>();
+                fuentes = new List<Dictionary<string, object>>();
             }
         }
         catch (Exception ex)
         {
             // En caso de error, guardar el mensaje y crear lista vacía
-            errorMensaje = $"Error al cargar represen visual: {ex.Message}";
-            represenVisuales = new List<Dictionary<string, object>>();
+            errorMensaje = $"Error al cargar fuentes: {ex.Message}";
+            fuentes = new List<Dictionary<string, object>>();
         }
         finally
         {
@@ -174,8 +174,8 @@ else
         return string.Empty;
     }
 
-    // Crear nuevo represen visual
-    private async Task CrearRepresenVisual()
+    // Crear nuevo fuente
+    private async Task CrearFuente()
     {
         // Verifica que el nombre no esté vacío ni sea solo espacios
         if (!string.IsNullOrWhiteSpace(nuevoNombre))
@@ -190,12 +190,12 @@ else
         var exito = await servicioEntidad.CrearAsync(PROYECTO, TABLA, nuevoRepresenVisual);
         if (exito)
         {
-            await CargarRepresenVisual(); // Recarga los datos para mostrar el nuevo elemento
+            await CargarFuente(); // Recarga los datos para mostrar el nuevo elemento
             nuevoNombre = string.Empty; // limpiamos el campo del formulario para ingresar mas nombres
         }
         else
         {
-            errorMensaje = "No se pudo crear el represen visual.";
+            errorMensaje = "No se pudo crear la fuente.";
         }
     }
 }
@@ -235,12 +235,12 @@ else
 
         if (exito)
         {
-            await CargarRepresenVisual(); // Recarga los datos para reflejar los cambios
+            await CargarFuente(); // Recarga los datos para reflejar los cambios
             CancelarEdicion();
         }
         else
         {
-            errorMensaje = "No se pudo actualizar el represen visual.";
+            errorMensaje = "No se pudo actualizar la fuente.";
         }
     }
     catch (Exception ex)
@@ -250,19 +250,19 @@ else
 }
 
     // Eliminar
-    private async Task EliminarRepresenVisual(string id)
+    private async Task EliminarFuente(string id)
     {
-        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el represen visual con ID {id}?");
+        var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar la fuente con ID {id}?");
         if (confirmado)
         {
             var exito = await servicioEntidad.EliminarAsync(PROYECTO, TABLA, "id", id);
             if (exito)
             {
-                await CargarRepresenVisual();
+                await CargarFuente();
             }
             else
             {
-                errorMensaje = "No se pudo eliminar el represen visual.";
+                errorMensaje = "No se pudo eliminar la fuente.";
             }
         }
     }

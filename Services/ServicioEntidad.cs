@@ -8,7 +8,8 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
     /// <summary>
     /// Servicio genérico para realizar operaciones CRUD con cualquier entidad a través de la API genérica.
     /// </summary>
-    public class ServicioEntidad // Declarar una clase pública llamada ServicioEntidad
+    public class ServicioEntidad// Declarar una clase pública llamada ServicioEntidad
+
     {
         private readonly HttpClient _clienteHttp;       // Cliente HTTP que se usará para comunicarse con la API
          private readonly string baseUrl = "http://localhost:5239";
