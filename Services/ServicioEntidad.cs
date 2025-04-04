@@ -8,14 +8,14 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
     /// <summary>
     /// Servicio genérico para realizar operaciones CRUD con cualquier entidad a través de la API genérica.
     /// </summary>
-    public class ServicioTipoActor  // Declarar una clase pública llamada ServicioEntidad
+    public class ServicioEntidad// Declarar una clase pública llamada ServicioEntidad
     {
         private readonly HttpClient _clienteHttp;       // Cliente HTTP que se usará para comunicarse con la API
          private readonly string baseUrl = "http://localhost:5239";
         private readonly JsonSerializerOptions _opcionesJson;  // Opciones para configurar cómo se serializa/deserializa el JSON
 
         // Constructor: se ejecuta cuando se crea una instancia de esta clase
-        public ServicioTipoActor(HttpClient clienteHttp)   // Recibir un HttpClient como parámetro mediante inyección de dependencias
+        public ServicioEntidad(HttpClient clienteHttp)   // Recibir un HttpClient como parámetro mediante inyección de dependencias
         {
             _clienteHttp = clienteHttp;    // Guardar el HttpClient recibido para usarlo en los métodos
             
@@ -135,7 +135,7 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         /// <param name="nombreClave">Nombre del campo clave.</param>
         /// <param name="valorClave">Valor de la clave de la entidad a actualizar.</param>
         /// <param name="entidad">Datos actualizados de la entidad.</param>
-        public async Task<bool> ActualizarTipoActorAsync(string nombreProyecto, string nombreTabla, string nombreClave, string valorClave, Dictionary<string, object?> datos)
+        public async Task<bool> ActualizarAsync(string nombreProyecto, string nombreTabla, string nombreClave, string valorClave, Dictionary<string, object?> datos)
         {
             // Construye la URL dinámica
             string url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";

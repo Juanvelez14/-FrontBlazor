@@ -28,8 +28,8 @@ builder.Services.AddScoped(sp => new HttpClient {
 // Registra el servicio genérico de entidades en el contenedor de inyección de dependencias
 // Esto permitirá inyectar el servicio en cualquier componente Blazor que lo necesite
 // El servicio maneja todas las operaciones CRUD con cualquier tabla de la base de datos
-builder.Services.AddScoped<ServicioTipoActor>();
-builder.Services.AddScoped<ServicioRepresenVisual>();
+builder.Services.AddScoped<ServicioEntidad>();
+
 
 // Construye la aplicación a partir de la configuración establecida en el builder y la ejecuta
 // builder.Build() crea la instancia de WebAssemblyHost con todas las configuraciones definidas
