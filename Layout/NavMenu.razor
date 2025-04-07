@@ -1,4 +1,17 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿<style>
+    .nav-scrollable {
+        width: 250px;
+        min-width: 250px;
+    }
+
+    .nav-link {
+        white-space: normal !important;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">FrontBlazor</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -42,6 +55,11 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="fuente">
                 <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Fuente
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="indicador">
+                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Indicador
             </NavLink>
         </div>
 
