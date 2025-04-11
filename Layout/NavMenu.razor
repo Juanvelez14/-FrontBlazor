@@ -1,5 +1,19 @@
 ﻿@using Microsoft.AspNetCore.Components.Routing
 
+<style>
+    .nav-scrollable {
+        width: 250px;
+        min-width: 250px;
+    }
+
+    .nav-link {
+        white-space: normal !important;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
+
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">FrontBlazor</a>
@@ -77,6 +91,23 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="fuente">
                 <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Fuente
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="indicador">
+                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Indicador
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="resultado-indicador">
+                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Resultado Indicador
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link d-flex align-items-center text-truncate" style="max-width: 100%;" href="represen-visual-indicador">
+                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>
+                <span class="ms-2 text-truncate" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">  Respresen Visual por indicador
+                </span>
             </NavLink>
         </div>
 
