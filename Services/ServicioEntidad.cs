@@ -220,6 +220,31 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
             }
         }
 
+        public async Task<List<Dictionary<string, object>>?> ObtenerPorCampoAsync(
+            string nombreProyecto,
+            string nombreTabla,
+            string campo,
+            string valor)
+        {
+            try
+            {
+                var url = $"{baseUrl}/api/{nombreProyecto}/{nombreTabla}/filtrar?campo={campo}&valor={valor}";
+
+
+                var respuesta = await _clienteHttp.GetAsync(url);
+                respuesta.EnsureSuccessStatusCode();
+
+                var json = await respuesta.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener por campo: {ex.Message}");
+                return null;
+            }
+        }
+
+
     }
 
     

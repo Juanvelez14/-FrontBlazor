@@ -81,26 +81,28 @@
             </div>
             <div class="col-md-6 mb-3">
                 <label>Artículo</label>
-                <select class="form-control" @bind="nuevoArticulo">
+                <select class="form-control" @onchange="OnArticuloCambiado">
                     <option value="">Seleccione</option>
                     @foreach (var articulo in listaArticulos)
                     {
                         <option value="@articulo["id"]?.ToString()">@articulo["nombre"]?.ToString()</option>
                     }
                 </select>
+
             </div>
             <div class="col-md-6 mb-3">
                 <label>Literal</label>
-                <select class="form-control" @bind="nuevoLiteral">
+                <select class="form-control" @onchange="OnLiteralCambiado">
                     <option value="">Seleccione</option>
                     @foreach (var literal in listaLiterales)
                     {
                         <option value="@literal["id"]?.ToString()">@literal["descripcion"]?.ToString()</option>
                     }
                 </select>
+
             </div>
             <div class="col-md-6 mb-3">
-                <label>Numeral</label>
+                <label>Numeral</label>                
                 <select class="form-control" @bind="nuevoNumeral">
                     <option value="">Seleccione</option>
                     @foreach (var numeral in listaNumerales)
@@ -118,6 +120,7 @@
                         <option value="@paragrafo["id"]?.ToString()">@paragrafo["descripcion"]?.ToString()</option>
                     }
                 </select>
+
             </div>
         </div>
 
@@ -392,6 +395,20 @@ else
 }
 
 @code {
+    
+    private async Task OnArticuloCambiado(ChangeEventArgs e)
+    {
+        nuevoArticulo = e.Value?.ToString() ?? string.Empty;
+        await CargarDependientesArticulo(nuevoArticulo);
+    }
+    
+    private async Task OnLiteralCambiado(ChangeEventArgs e)
+    {
+        nuevoLiteral = e.Value?.ToString() ?? string.Empty;
+        await CargarDependientesLiteral(nuevoLiteral);
+    }
+    
+    
     // Lista para almacenar los productos que se obtienen de la API
     private List<Dictionary<string, object>> indicadores = new List<Dictionary<string, object>>();
     private List<Dictionary<string, object>> listaTiposIndicador = new();
@@ -442,10 +459,6 @@ else
     private string literalEditado = string.Empty;
     private string numeralEditado = string.Empty;
     private string paragrafoEditado = string.Empty;
-    
-
-    
-
 
     private bool mostrarFormulario = false;
 
@@ -574,24 +587,51 @@ else
 }
 
     // Iniciar edición
-    private void EmpezarEdicion(string id, string nombreActual, string codigoActual, string objetivoActual, string alcanceActual, string formulaActual, int tipoIndicadorActual, int unidadMedicionActual, string metaActual, int sentidoActual, int FrecuenciaActual, string articuloActual, string literalActuar, string numeralActual, string paragrafoActual)
-    {
-        editandoId = id;
-        nombreEditado = nombreActual;
-        codigoEditado = codigoActual;
-        objetivoEditado = objetivoActual;
-        alcanceEditado = alcanceActual;
-        formulaEditado = formulaActual;
-        tipoIndicadorEditado = tipoIndicadorActual;
-        unidadMedicionEditado = unidadMedicionActual;
-        metaEditado = metaActual;
-        sentidoEditado = sentidoActual;
-        frecuenciaEditado = FrecuenciaActual;
-        articuloEditado = articuloActual;
-        literalEditado = literalActuar;
-        numeralEditado = numeralActual;
-        paragrafoEditado = paragrafoActual;
+    private async void EmpezarEdicion(
+    string id,
+    string nombreActual,
+    string codigoActual,
+    string objetivoActual,
+    string alcanceActual,
+    string formulaActual,
+    int tipoIndicadorActual,
+    int unidadMedicionActual,
+    string metaActual,
+    int sentidoActual,
+    int frecuenciaActual,
+    string articuloActual,
+    string literalActual,
+    string numeralActual,
+    string paragrafoActual)
+{
+    editandoId = id;
+    nombreEditado = nombreActual;
+    codigoEditado = codigoActual;
+    objetivoEditado = objetivoActual;
+    alcanceEditado = alcanceActual;
+    formulaEditado = formulaActual;
+    tipoIndicadorEditado = tipoIndicadorActual;
+    unidadMedicionEditado = unidadMedicionActual;
+    metaEditado = metaActual;
+    sentidoEditado = sentidoActual;
+    frecuenciaEditado = frecuenciaActual;
+    articuloEditado = articuloActual;
+    literalEditado = literalActual;
+    numeralEditado = numeralActual;
+    paragrafoEditado = paragrafoActual;
+
+    // 👇 Cargar literales y parágrafos relacionados con el artículo
+    listaLiterales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "literal", "fkidarticulo", articuloEditado)
+                      ?? new List<Dictionary<string, object>>();
+    
+    listaParagrafos = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "paragrafo", "fkidarticulo", articuloEditado)
+                      ?? new List<Dictionary<string, object>>();
+
+    // 👇 Cargar numerales relacionados con el literal
+    listaNumerales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "numeral", "fkidliteral", literalEditado)
+                      ?? new List<Dictionary<string, object>>();
     }
+
 
     // Cancelar edición
     private void CancelarEdicion()
@@ -676,6 +716,60 @@ else
                 errorMensaje = "No se pudo eliminar el represen visual.";
             }
         }
+    }
+
+    private async Task OnArticuloSeleccionado()
+    {
+        listaLiterales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "literal", "fkidarticulo", nuevoArticulo)
+                            ?? new();
+        listaParagrafos = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "paragrafo", "fkidarticulo", nuevoArticulo)
+                            ?? new();
+
+        nuevoLiteral = string.Empty;
+        nuevoNumeral = string.Empty;
+        nuevoParagrafo = string.Empty;
+        listaNumerales = new();
+    }
+
+    private async Task OnLiteralSeleccionado()
+    {
+        listaNumerales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "numeral", "fkidliteral", nuevoLiteral)
+                            ?? new();
+
+        nuevoNumeral = string.Empty;
+    }
+
+
+
+    private async Task CargarDependientesArticulo(string idArticulo)
+    {
+        Console.WriteLine($"🔍 Cargando dependientes para Artículo: {idArticulo}");
+        listaLiterales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "literal", "fkidarticulo", idArticulo)
+                        ?? new List<Dictionary<string, object>>();
+        
+        Console.WriteLine($"📄 Literales encontrados: {listaLiterales.Count}");
+
+        listaParagrafos = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "paragrafo", "fkidarticulo", idArticulo)
+                        ?? new List<Dictionary<string, object>>();
+        
+        Console.WriteLine($"📄 Parágrafos encontrados: {listaParagrafos.Count}");
+        
+        
+
+        // Limpiar selección anterior
+        nuevoLiteral = string.Empty;
+        nuevoNumeral = string.Empty;
+        nuevoParagrafo = string.Empty;
+        listaNumerales = new();
+    }
+
+    private async Task CargarDependientesLiteral(string idLiteral)
+    {
+        listaNumerales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "numeral", "fkidliteral", idLiteral)
+                        ?? new List<Dictionary<string, object>>();
+
+        // Limpiar selección anterior
+        nuevoNumeral = string.Empty;
     }
 
     // Inyectar JavaScript runtime para mostrar confirmaciones
