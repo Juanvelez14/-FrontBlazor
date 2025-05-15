@@ -1,4 +1,7 @@
 ﻿@namespace FrontBlazor
+@using FrontBlazor.Services
+@inject SesionUsuarioService Sesion
+
 <!-- Router es el componente principal de navegación en Blazor -->
 <!-- Gestiona la navegación entre páginas según las URL sin recargar la página completa -->
 <!-- AppAssembly especifica el ensamblado que contiene los componentes de la aplicación -->
@@ -11,18 +14,18 @@
         <!-- RouteData contiene los datos de la ruta (componente a mostrar, parámetros, etc.) -->
         <!-- DefaultLayout especifica el diseño predeterminado para todas las páginas -->
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        
+
         <!-- FocusOnNavigate cambia el foco al encabezado principal al navegar entre páginas -->
         <!-- Esto mejora la accesibilidad, especialmente para lectores de pantalla -->
         <!-- Selector="h1" indica que el foco debe ir al primer elemento h1 de la página -->
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
-    
+
     <!-- Sección NotFound: Define qué mostrar cuando la URL no coincide con ninguna ruta -->
     <NotFound>
         <!-- Establece el título de la página para la ruta no encontrada -->
         <PageTitle>Not found</PageTitle>
-        
+
         <!-- LayoutView aplica el mismo diseño (MainLayout) a la página de error 404 -->
         <LayoutView Layout="@typeof(MainLayout)">
             <!-- Mensaje de error mostrado al usuario cuando no se encuentra la página -->
@@ -31,3 +34,11 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Se llama al cargar la aplicación para intentar recuperar la sesión desde el localStorage
+        await Sesion.CargarSesionAsync();
+    }
+}

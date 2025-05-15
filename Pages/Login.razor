@@ -1,0 +1,107 @@
+@page "/login"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using FrontBlazor.Services
+@inject IJSRuntime JS
+@inject ServicioEntidad ServicioEntidad
+@inject ServicioSesion Sesion
+@inject SesionUsuarioService SesionUsuario
+
+<div class="login-container">
+    <div class="login-box">
+        <h2 class="text-center mb-4">Iniciar sesión</h2>
+
+        <EditForm Model="@credenciales" OnValidSubmit="IniciarSesion">
+            <div class="form-group mb-3">
+                <label for="email">Correo electrónico</label>
+                <InputText id="email" class="form-control" @bind-Value="credenciales.Email" placeholder="Correo electrónico" />
+            </div>
+            <div class="form-group mb-4">
+                <label for="password">Contraseña</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="credenciales.Contrasena" placeholder="Contraseña" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert alert-danger mt-3">@mensajeError</div>
+        }
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to right, #434343, #000000);
+    }
+
+    .login-box {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 400px;
+    }
+</style>
+
+@code {
+    private CredencialesUsuario credenciales = new();
+    private string mensajeError = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SesionUsuario.CargarDesdeLocalStorageAsync();
+
+        if (SesionUsuario.EstaLogueado)
+        {
+            Navigation.NavigateTo("/menu", true);
+        }
+    }
+
+    private async Task IniciarSesion()
+    {
+        var respuesta = await ServicioEntidad.VerificarUsuarioAsync("proyecto", "usuario", credenciales.Email, credenciales.Contrasena);
+
+        if (respuesta.IsSuccessStatusCode)
+        {
+            var datos = await respuesta.Content.ReadFromJsonAsync<RespuestaUsuario>();
+
+            await JS.InvokeVoidAsync("localStorage.setItem", "usuario", datos!.Email);
+            await JS.InvokeVoidAsync("localStorage.setItem", "roles", string.Join(",", datos.Roles));
+
+            await SesionUsuario.CargarDesdeLocalStorageAsync();
+
+            Navigation.NavigateTo("/menu", true);
+        }
+        else if (respuesta.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            mensajeError = "Contraseña incorrecta.";
+        }
+        else if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            mensajeError = "Usuario no encontrado.";
+        }
+        else
+        {
+            mensajeError = "Error al iniciar sesión.";
+        }
+    }
+
+    public class CredencialesUsuario
+    {
+        public string Email { get; set; } = "";
+        public string Contrasena { get; set; } = "";
+    }
+
+    public class RespuestaUsuario
+    {
+        public string Email { get; set; } = "";
+        public List<string> Roles { get; set; } = new();
+    }
+}

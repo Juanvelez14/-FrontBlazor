@@ -1,0 +1,48 @@
+@page "/menu"
+@inject NavigationManager navegacionManager
+@inject IJSRuntime JS
+@using FrontBlazor.Services
+@inject SesionUsuarioService SesionUsuario
+
+<h3 class="text-center mt-4">Bienvenido, @SesionUsuario.Email</h3>
+
+@if (cargandoSesion)
+{
+    <p class="text-center text-muted">Verificando sesión...</p>
+    return;
+}
+@if (!SesionUsuario.EstaLogueado)
+{
+    <p class="text-center text-danger">Redirigiendo al login...</p>
+}
+else
+{
+    <div class="container mt-4">
+        <div class="row justify-content-center gap-3">
+            <button class="btn btn-primary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/actor"))">Ir a actor</button>
+            <button class="btn btn-secondary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/fuente"))">Ir a fuente</button>
+            <button class="btn btn-success col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/indicador"))">Ir a indicador</button>
+            <button class="btn btn-info col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/represen-visual"))">Ir a represen visual</button>
+            <button class="btn btn-warning col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/sentido"))">Ir a sentido</button>
+            <button class="btn btn-dark col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/tipo-actor"))">Ir a tipo actor</button>
+            <button class="btn btn-light col-4 text-dark" @onclick="@(() => navegacionManager.NavigateTo("/tipo-indicador"))">Ir a tipo indicador</button>
+            <button class="btn btn-primary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/Unidad-Medicion"))">Ir a unidad medición</button>
+            <button class="btn btn-secondary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/variable"))">Ir a variable</button>
+            <button class="btn btn-success col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/variable-indicador"))">Ir a variable indicador</button>
+        </div>
+    </div>
+}
+
+@code {
+    private bool cargandoSesion = true;
+    protected override async Task OnInitializedAsync()
+    {
+        await SesionUsuario.CargarDesdeLocalStorageAsync();
+        cargandoSesion = false;
+
+        if (!SesionUsuario.EstaLogueado)
+        {
+            navegacionManager.NavigateTo("/login", true);
+        }
+    }
+}

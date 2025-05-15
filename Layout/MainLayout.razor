@@ -1,12 +1,23 @@
 ﻿@inherits LayoutComponentBase
+@using FrontBlazor.Services
+@inject NavigationManager Navigation
+@inject SesionUsuarioService Sesion
+
+
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <div class="top-row px-4">
+        <div class="top-row px-4 justify-content-between d-flex align-items-center">
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            @if (Sesion.EstaLogueado)
+            {
+                <div class="text-muted">Bienvenido, @Sesion.Email</div>
+                <button class="btn btn-link text-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+            }
         </div>
 
         <article class="content px-4">
@@ -14,3 +25,16 @@
         </article>
     </main>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Sesion.CargarSesionAsync(); // <- Carga usuario y roles desde localStorage
+    }
+
+    private async Task CerrarSesion()
+    {
+        await Sesion.CerrarSesionAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

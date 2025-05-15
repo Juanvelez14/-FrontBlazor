@@ -2,6 +2,8 @@ using System.Net.Http;
 using System.Net.Http.Json;     // Importar esta librería para usar métodos que ayudan a trabajar con JSON en solicitudes HTTP
 using System.Text;              // Necesario para trabajar con codificación de texto (UTF-8 para JSON)
 using System.Text.Json;         // Proporcionar funcionalidad para serializar y deserializar JSON
+using Microsoft.JSInterop;
+
 
 namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicará esta clase
 {
@@ -13,11 +15,14 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         private readonly HttpClient _clienteHttp;       // Cliente HTTP que se usará para comunicarse con la API
          private readonly string baseUrl = "http://localhost:5239";
         private readonly JsonSerializerOptions _opcionesJson;  // Opciones para configurar cómo se serializa/deserializa el JSON
+        private readonly IJSRuntime _js;
+
 
         // Constructor: se ejecuta cuando se crea una instancia de esta clase
-        public ServicioEntidad(HttpClient clienteHttp)   // Recibir un HttpClient como parámetro mediante inyección de dependencias
+        public ServicioEntidad(HttpClient clienteHttp, IJSRuntime js)   // Recibir un HttpClient como parámetro mediante inyección de dependencias
         {
             _clienteHttp = clienteHttp;    // Guardar el HttpClient recibido para usarlo en los métodos
+            _js = js;
             
             // Configurar las opciones para el serializador JSON
             _opcionesJson = new JsonSerializerOptions
@@ -96,36 +101,28 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         /// <param name="nombreTabla">Nombre de la tabla donde crear la entidad.</param>
         /// <param name="entidad">Datos de la entidad a crear.</param>
         public async Task<bool> CrearAsync(
-            string nombreProyecto, 
-            string nombreTabla, 
+            string nombreProyecto,
+            string nombreTabla,
             Dictionary<string, object> entidad)
         {
-            // Esta función crea una nueva entidad en la base de datos
-            // Recibe un diccionario con los datos de la entidad a crear
-            // Devuelve true si la operación fue exitosa, false en caso contrario
-            
             try
             {
-                var url = $"{nombreProyecto}/{nombreTabla}";  // Construir la URL
-                
-                // Convertir el diccionario a JSON y prepararlo para enviarlo en la petición HTTP
+                var url = $"{nombreProyecto}/{nombreTabla}";
                 var contenido = new StringContent(
-                    JsonSerializer.Serialize(entidad),  // Convertir el diccionario a una cadena JSON
-                    Encoding.UTF8,                      // Usar codificación UTF-8 (estándar para JSON)
-                    "application/json");                // Indicar que el contenido es de tipo JSON
-                
-                // Enviar la petición POST con los datos de la entidad
+                    JsonSerializer.Serialize(entidad),
+                    Encoding.UTF8,
+                    "application/json");
+
                 var respuesta = await _clienteHttp.PostAsync(url, contenido);
-                
-                // Devolver true si la respuesta indica éxito, false en caso contrario
                 return respuesta.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al crear entidad: {ex.Message}");
-                return false;  // Devolver false si ocurre un error
+                return false;
             }
         }
+
 
         /// <summary>
         /// Actualiza una entidad existente.
@@ -135,19 +132,27 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         /// <param name="nombreClave">Nombre del campo clave.</param>
         /// <param name="valorClave">Valor de la clave de la entidad a actualizar.</param>
         /// <param name="entidad">Datos actualizados de la entidad.</param>
-        public async Task<bool> ActualizarAsync(string nombreProyecto, string nombreTabla, string nombreClave, string valorClave, Dictionary<string, object?> datos)
+        public async Task<bool> ActualizarAsync(
+            string nombreProyecto,
+            string nombreTabla,
+            string nombreClave,
+            string valorClave,
+            Dictionary<string, object?> datos)
         {
-            // Construye la URL dinámica
-            string url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";
-
-            // Serializa los datos a JSON
-            var contenido = new StringContent(JsonSerializer.Serialize(datos), Encoding.UTF8, "application/json");
-
-            // Realiza la solicitud PUT
-            var respuesta = await _clienteHttp.PutAsync(url, contenido);
-
-            return respuesta.IsSuccessStatusCode;
+            try
+            {
+                string url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";
+                var contenido = new StringContent(JsonSerializer.Serialize(datos), Encoding.UTF8, "application/json");
+                var respuesta = await _clienteHttp.PutAsync(url, contenido);
+                return respuesta.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar entidad: {ex.Message}");
+                return false;
+            }
         }
+
 
         /// <summary>
         /// Elimina una entidad por su clave primaria.
@@ -157,32 +162,25 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         /// <param name="nombreClave">Nombre del campo clave.</param>
         /// <param name="valorClave">Valor de la clave de la entidad a eliminar.</param>
         public async Task<bool> EliminarAsync(
-            string nombreProyecto, 
-            string nombreTabla, 
-            string nombreClave, 
+            string nombreProyecto,
+            string nombreTabla,
+            string nombreClave,
             string valorClave)
         {
-            // Esta función elimina una entidad de la base de datos
-            // Solo necesita la información de la clave primaria para identificar qué eliminar
-            // Devuelve true si la operación fue exitosa, false en caso contrario
-            
             try
             {
-                // Construir la URL incluyendo la clave primaria para identificar la entidad a eliminar
                 var url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";
-                
-                // Enviar la petición DELETE sin necesidad de enviar datos adicionales
                 var respuesta = await _clienteHttp.DeleteAsync(url);
-                
-                // Devolver true si la respuesta indica éxito, false en caso contrario
                 return respuesta.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al eliminar entidad: {ex.Message}");
-                return false;  // Devolver false si ocurre un error
+                return false;
             }
         }
+     
+
 
         public async Task<List<Dictionary<string, object>>?> EjecutarProcedimientoAsync(
             string nombreProyecto,
@@ -243,6 +241,22 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
                 return null;
             }
         }
+
+        /// <summary>
+        /// Verifica el usuario y obtiene sus roles.
+        /// </summary>
+        public async Task<HttpResponseMessage> VerificarUsuarioAsync(string nombreProyecto, string nombreTabla, string email, string contrasena)
+        {
+            var datos = new Dictionary<string, string>
+            {
+                { "email", email },
+                { "contrasena", contrasena }
+            };
+
+            var url = $"{baseUrl}/api/{nombreProyecto}/{nombreTabla}/verificar-usuario";
+            return await _clienteHttp.PostAsJsonAsync(url, datos);
+        }
+
 
 
     }

@@ -10,15 +10,26 @@
 <!--  Inyecta el servicio que se comunicará con la API Servicio entidad -->
 @inject NavigationManager navegacionManager  
 <!--  Inyecta el servicio para manejar la navegación entre páginas Servicio entidad-->
+@inject SesionUsuarioService Sesion
+
 
 <PageTitle>Lista de fuentes</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
 <h1>Fuente</h1>  <!-- Encabezado principal de la página -->
 
-<div class="mb-3">
-    <input class="form-control" @bind="nuevoNombre" placeholder="fuente" />
-    <button class="btn btn-success mt-2" @onclick="CrearFuente">Crear</button>
-</div>
+@if (cargandoSesion)
+{
+    <p><em>Verificando sesión...</em></p>
+    return;
+}
+
+@if (PuedeCrear)
+{
+    <div class="mb-3">
+        <input class="form-control" @bind="nuevoNombre" placeholder="fuente" />
+        <button class="btn btn-success mt-2" @onclick="CrearFuente">Crear</button>
+    </div>
+}
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
 <!-- Si no está cargando pero no hay fuentes o la lista es nula, muestra un mensaje informativo -->
@@ -71,8 +82,15 @@ else
                         }
                         else
                         {
-                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarFuente(id)">Eliminar</button>
+                            
+                            @if (PuedeEditar)
+                            {
+                                <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
+                            }
+                            @if (PuedeEliminar)
+                            {
+                                <button class="btn btn-sm btn-danger" @onclick="() => EliminarFuente(id)">Eliminar</button>
+                            }     
                         }
                     </td>
                 </tr>
@@ -92,6 +110,13 @@ else
 }
 
 @code {
+    private bool cargandoSesion = true;
+
+    
+    private bool PuedeCrear => Sesion.EsAdministrador;
+    private bool PuedeEditar => Sesion.EsAdministrador || Sesion.EsValidador;
+    private bool PuedeEliminar => Sesion.EsAdministrador;
+    
     // Lista para almacenar los fuentes que se obtienen de la API
     private List<Dictionary<string, object>> fuentes = new List<Dictionary<string, object>>();
     
@@ -115,9 +140,15 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar las fuentes
+        await Sesion.CargarSesionAsync();
+        cargandoSesion = false;
+
+        if (!Sesion.TieneAcceso())
+            return;
+
         await CargarFuente();
     }
+
 
     // Método asíncrono para cargar las fuentes desde la API
     private async Task CargarFuente()
@@ -177,6 +208,7 @@ else
     // Crear nuevo fuente
     private async Task CrearFuente()
     {
+        if (!PuedeCrear) return;
         // Verifica que el nombre no esté vacío ni sea solo espacios
         if (!string.IsNullOrWhiteSpace(nuevoNombre))
         {
@@ -217,6 +249,7 @@ else
     // Guardar cambios de edición
     private async Task GuardarEdicion(string id)
     {
+        if (!PuedeEditar) return;
         try
         {
             var datos = new Dictionary<string, object?>
@@ -252,6 +285,7 @@ else
     // Eliminar
     private async Task EliminarFuente(string id)
     {
+        if (!PuedeEliminar) return;
         var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar la fuente con ID {id}?");
         if (confirmado)
         {

@@ -5,10 +5,20 @@
 @inject ServicioEntidad servicioEntidad
 @inject NavigationManager navegacionManager
 @inject IJSRuntime JSRuntime
+@inject SesionUsuarioService Sesion
+
+
 
 <PageTitle>Lista Responsables por Indicador</PageTitle>
 
 <h1 class="mb-4 text-primary">Responsables por Indicador</h1>
+
+@if (cargandoSesion)
+{
+    <p><em>Verificando sesión...</em></p>
+    return;
+}
+
 
 <div class="row mb-3">
     <div class="col-md-4">
@@ -173,6 +183,12 @@ else
 }
 
 @code {
+    private bool cargandoSesion = true;
+
+    private bool PuedeCrear => Sesion.EsAdministrador;
+    private bool PuedeEditar => Sesion.EsAdministrador || Sesion.EsValidador;
+    private bool PuedeEliminar => Sesion.EsAdministrador;
+
     private const string PROYECTO = "csharpapigenerica";
     private const string TABLA    = "responsablesporindicador";
 
@@ -201,9 +217,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await Sesion.CargarSesionAsync();
+        cargandoSesion = false;
+
+        if (!Sesion.TieneAcceso())
+            return;
+
         await CargarAsignaciones();
-        await CargarListasSelect();
+        await CargarListasSelect(); 
     }
+
 
     private async Task CargarAsignaciones()
     {

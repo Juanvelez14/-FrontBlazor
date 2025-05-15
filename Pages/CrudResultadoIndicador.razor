@@ -10,10 +10,20 @@
 <!--  Inyecta el servicio que se comunicará con la API Servicio entidad -->
 @inject NavigationManager navegacionManager  
 <!--  Inyecta el servicio para manejar la navegación entre páginas Servicio entidad-->
+@inject SesionUsuarioService Sesion
+
+
 
 <PageTitle>Lista de resultados indicadores</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
 <h1 class="mb-4 text-primary"> resultados Indicadores</h1>
+
+@if (cargandoSesion)
+{
+    <p><em>Verificando sesión...</em></p>
+    return;
+}
+
 
 <!-- Botón para mostrar/ocultar el formulario -->
 <button class="btn btn-primary mb-3" @onclick="ToggleFormulario">
@@ -45,7 +55,10 @@
             </div>    
         </div>
 
-        <button class="btn btn-success w-100 mt-3" @onclick="CrearResultadoIndicador">Crear Resultado Indicador</button>
+        @if (PuedeCrear)
+        {
+            <button class="btn btn-success w-100 mt-3" @onclick="CrearResultadoIndicador">Crear Resultado Indicador</button>
+        }
     </div>
 }
 
@@ -134,12 +147,18 @@ else
                             }
                             else
                             {
-                                <button class="btn btn-sm btn-primary" @onclick="() => EmpezarEdicion(id, double.Parse(resultadoIndicador), fecha, indicador)">
-                                    <i class="bi bi-pencil-square"></i> Editar
-                                </button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => EliminarIndicador(id)">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
+                                @if (PuedeEditar)
+                                {
+                                    <button class="btn btn-sm btn-primary" @onclick="() => EmpezarEdicion(id, double.Parse(resultadoIndicador), fecha, indicador)">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </button>
+                                }
+                                @if (PuedeEliminar)
+                                {
+                                    <button class="btn btn-sm btn-danger" @onclick="() => EliminarIndicador(id)">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                }
                             }
                         </div>
                     </td>
@@ -161,6 +180,15 @@ else
 }
 
 @code {
+
+    private bool cargandoSesion = true;
+
+    private bool PuedeCrear => Sesion.EsAdministrador;
+    private bool PuedeEditar => Sesion.EsAdministrador || Sesion.EsValidador;
+    private bool PuedeEliminar => Sesion.EsAdministrador;
+
+    
+    
     // Lista para almacenar los productos que se obtienen de la API
     private List<Dictionary<string, object>> resultadoIndicadores = new List<Dictionary<string, object>>();
     private List<Dictionary<string, object>> listaIndicador = new();
@@ -193,10 +221,16 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los represen visual
+        await Sesion.CargarSesionAsync();
+        cargandoSesion = false;
+
+        if (!Sesion.TieneAcceso())
+            return;
+
         await CargarIndicador();
-        await CargarListasSelect();
+        await CargarListasSelect(); // 🔁 ESTA LÍNEA ES NECESARIA
     }
+
 
     // Método asíncrono para cargar los represen visual desde la API
     private async Task CargarIndicador()
@@ -262,6 +296,7 @@ else
     // Crear nuevo represen visual
     private async Task CrearResultadoIndicador()
     {
+        if (!PuedeCrear) return;
         // Verifica que el nombre no esté vacío ni sea solo espacios
         if (nuevoResultado.HasValue && nuevoFechaCalculo != default && !string.IsNullOrWhiteSpace(nuevoIndicador))
         {
@@ -309,6 +344,7 @@ else
     // Guardar cambios de edición
     private async Task GuardarEdicion(string id)
     {
+        if (!PuedeEditar) return;
         try
         {
             var datos = new Dictionary<string, object?>
@@ -346,6 +382,7 @@ else
     // Eliminar
     private async Task EliminarIndicador(string id)
     {
+        if (!PuedeEliminar) return;
         var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el  resultado del indicador con ID {id}?");
         if (confirmado)
         {

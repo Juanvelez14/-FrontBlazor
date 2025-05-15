@@ -5,17 +5,35 @@
 @inject ServicioEntidad servicioEntidad
 @inject NavigationManager navegacionManager
 @inject IJSRuntime JSRuntime
+@inject SesionUsuarioService Sesion
+
+
 
 <PageTitle>Lista actor</PageTitle>
 
 <h1 class="mb-4 text-primary">Actor</h1>
 
+@if (cargandoSesion)
+{
+    <p><em>Verificando sesión...</em></p>
+    return;
+}
+
+@if (!Sesion.TieneAcceso())
+{
+    <p class="text-danger">No tienes permisos para acceder a esta página.</p>
+    return;
+}
+
 <div class="row mb-3">
-    <div class="col-md-6">
-        <button class="btn btn-primary w-100" @onclick="ToggleFormulario">
-            @((mostrarFormulario ? "Cerrar formulario" : "Crear Actor"))
-        </button>
-    </div>
+    @if (Sesion.EsValidador || Sesion.EsAdministrador)
+    {
+        <div class="col-md-6">
+            <button class="btn btn-primary w-100" @onclick="ToggleFormulario">
+                @((mostrarFormulario ? "Cerrar formulario" : "Crear Actor"))
+            </button>
+        </div>
+    }
     <div class="col-md-6">
         <!-- Barra de búsqueda -->
         <input class="form-control" placeholder="Buscar por nombre..."
@@ -23,7 +41,7 @@
     </div>
 </div>
 
-@if (mostrarFormulario)
+@if (mostrarFormulario && (Sesion.EsAdministrador || Sesion.EsValidador))
 {
     <div class="card p-4 mb-4 shadow">
         <div class="row">
@@ -135,14 +153,20 @@ else
                                     }
                                     else
                                     {
-                                        <button class="btn btn-sm btn-primary"
-                                                @onclick="() => EmpezarEdicion(id, nombre, int.Parse(tipoactor))">
-                                            <i class="bi bi-pencil-square"></i> Editar
-                                        </button>
-                                        <button class="btn btn-sm btn-danger"
-                                                @onclick="() => EliminarActor(id)">
-                                            <i class="bi bi-trash"></i> Eliminar
-                                        </button>
+                                        @if (Sesion.EsAdministrador || Sesion.EsValidador)
+                                        {
+                                            <button class="btn btn-sm btn-primary"
+                                                    @onclick="() => EmpezarEdicion(id, nombre, int.Parse(tipoactor))">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </button>
+                                        }
+                                        @if (Sesion.EsAdministrador)
+                                        {    
+                                            <button class="btn btn-sm btn-danger"
+                                                    @onclick="() => EliminarActor(id)">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        }    
                                     }
                                 </div>
                             </td>
@@ -162,6 +186,8 @@ else
 }
 
 @code {
+    private bool cargandoSesion = true;
+
     private List<Dictionary<string, object>> actores = new();
     private List<Dictionary<string, object>> listaTipoActor = new();
 
@@ -189,9 +215,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await Sesion.CargarSesionAsync();
+        cargandoSesion = false;
+
+        if (!Sesion.TieneAcceso())
+            return;
+
         await CargarActor();
         await CargarListasSelect();
     }
+
+
 
     private async Task CargarActor()
     {
@@ -230,6 +264,13 @@ else
     private async Task CrearActor()
     {
         errorMensaje = null;
+        
+        if (!Sesion.EsAdministrador && !Sesion.EsValidador)
+        {
+            errorMensaje = "No tiene permisos para crear actores.";
+            return;
+        }
+        
         if (string.IsNullOrWhiteSpace(nuevoNombre)) return;
 
         var nuevo = new Dictionary<string, object?>
@@ -270,6 +311,13 @@ else
     private async Task GuardarEdicion(string id)
     {
         errorMensaje = null;
+        
+        if (!Sesion.EsAdministrador && !Sesion.EsValidador)
+        {
+            errorMensaje = "No tiene permisos para editar actores.";
+            return;
+        }   
+        
         var datos = new Dictionary<string, object?>
         {
             ["id"]            = id,
@@ -292,6 +340,13 @@ else
     private async Task EliminarActor(string id)
     {
         errorMensaje = null;
+
+        if (!Sesion.EsAdministrador)
+        {
+            errorMensaje = "No tiene permisos para eliminar actores.";
+            return;
+        }
+        
         var confirmar = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Eliminar actor {id}?");
         if (!confirmar) return;
 

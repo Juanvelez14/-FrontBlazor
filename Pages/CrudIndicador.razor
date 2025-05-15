@@ -10,10 +10,20 @@
 <!--  Inyecta el servicio que se comunicará con la API Servicio entidad -->
 @inject NavigationManager navegacionManager  
 <!--  Inyecta el servicio para manejar la navegación entre páginas Servicio entidad-->
+@inject SesionUsuarioService Sesion
+
+
 
 <PageTitle>Lista de indicadores</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
 <h1 class="mb-4 text-primary">Indicadores</h1>
+
+@if (cargandoSesion)
+{
+    <p><em>Verificando sesión...</em></p>
+    return;
+}
+
 
 <!-- Botón para mostrar/ocultar el formulario -->
 <button class="btn btn-primary mb-3" @onclick="ToggleFormulario">
@@ -124,7 +134,10 @@
             </div>
         </div>
 
-        <button class="btn btn-success w-100 mt-3" @onclick="CrearIndicador">Crear Indicador</button>
+        @if (PuedeCrear)
+        {
+            <button class="btn btn-success w-100 mt-3" @onclick="CrearIndicador">Crear Indicador</button>
+        }
     </div>
 }
 
@@ -368,12 +381,18 @@ else
                             }
                             else
                             {
-                                <button class="btn btn-sm btn-primary" @onclick="() => EmpezarEdicion(id, codigo, nombre, objetivo, alcance, formula, int.Parse(tipoIndicador), int.Parse(unidadMedicion), meta, int.Parse(sentido), int.Parse(frecuencia), articulo, literal, numeral, paragrafo)">
-                                    <i class="bi bi-pencil-square"></i> Editar
-                                </button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => EliminarIndicador(id)">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
+                                @if (PuedeEditar)
+                                {
+                                    <button class="btn btn-sm btn-primary" @onclick="() => EmpezarEdicion(id, codigo, nombre, objetivo, alcance, formula, int.Parse(tipoIndicador), int.Parse(unidadMedicion), meta, int.Parse(sentido), int.Parse(frecuencia), articulo, literal, numeral, paragrafo)">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </button>
+                                }
+                                @if (PuedeEliminar)
+                                {
+                                    <button class="btn btn-sm btn-danger" @onclick="() => EliminarIndicador(id)">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                }
                             }
                         </div>
                     </td>
@@ -395,6 +414,13 @@ else
 }
 
 @code {
+    private bool cargandoSesion = true;
+
+    private bool PuedeCrear => Sesion.EsAdministrador;
+    private bool PuedeEditar => Sesion.EsAdministrador || Sesion.EsValidador;
+    private bool PuedeEliminar => Sesion.EsAdministrador;
+
+    
     
     private async Task OnArticuloCambiado(ChangeEventArgs e)
     {
@@ -474,10 +500,17 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los represen visual
+        await Sesion.CargarSesionAsync();
+        cargandoSesion = false;
+
+        if (!Sesion.TieneAcceso())
+            return;
+
         await CargarIndicador();
         await CargarListasSelect();
-    }
+        
+}
+
 
     // Método asíncrono para cargar los represen visual desde la API
     private async Task CargarIndicador()
@@ -550,6 +583,7 @@ else
     // Crear nuevo represen visual
     private async Task CrearIndicador()
     {
+        if (!PuedeCrear) return;
         // Verifica que el nombre no esté vacío ni sea solo espacios
         if (!string.IsNullOrWhiteSpace(nuevoNombre))
         {
@@ -603,22 +637,23 @@ else
     string literalActual,
     string numeralActual,
     string paragrafoActual)
-{
-    editandoId = id;
-    nombreEditado = nombreActual;
-    codigoEditado = codigoActual;
-    objetivoEditado = objetivoActual;
-    alcanceEditado = alcanceActual;
-    formulaEditado = formulaActual;
-    tipoIndicadorEditado = tipoIndicadorActual;
-    unidadMedicionEditado = unidadMedicionActual;
-    metaEditado = metaActual;
-    sentidoEditado = sentidoActual;
-    frecuenciaEditado = frecuenciaActual;
-    articuloEditado = articuloActual;
-    literalEditado = literalActual;
-    numeralEditado = numeralActual;
-    paragrafoEditado = paragrafoActual;
+    
+    {
+        editandoId = id;
+        nombreEditado = nombreActual;
+        codigoEditado = codigoActual;
+        objetivoEditado = objetivoActual;
+        alcanceEditado = alcanceActual;
+        formulaEditado = formulaActual;
+        tipoIndicadorEditado = tipoIndicadorActual;
+        unidadMedicionEditado = unidadMedicionActual;
+        metaEditado = metaActual;
+        sentidoEditado = sentidoActual;
+        frecuenciaEditado = frecuenciaActual;
+        articuloEditado = articuloActual;
+        literalEditado = literalActual;
+        numeralEditado = numeralActual;
+        paragrafoEditado = paragrafoActual;
 
     // 👇 Cargar literales y parágrafos relacionados con el artículo
     listaLiterales = await servicioEntidad.ObtenerPorCampoAsync(PROYECTO, "literal", "fkidarticulo", articuloEditado)
@@ -656,6 +691,7 @@ else
     // Guardar cambios de edición
     private async Task GuardarEdicion(string id)
     {
+        if (!PuedeEditar) return;
         try
         {
             var datos = new Dictionary<string, object?>
@@ -703,6 +739,7 @@ else
     // Eliminar
     private async Task EliminarIndicador(string id)
     {
+        if (!PuedeEliminar) return;
         var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el indicador con ID {id}?");
         if (confirmado)
         {

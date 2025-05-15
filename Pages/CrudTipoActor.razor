@@ -10,14 +10,27 @@
 <!--  Inyecta el servicio que se comunicará con la API ServicioEntidad -->
 @inject NavigationManager navegacionManager  
 <!--  Inyecta el servicio para manejar la navegación entre páginas ServicioEntidad-->
+@inject SesionUsuarioService Sesion
+
+
 
 <PageTitle>Lista de Tipo actor</PageTitle>  <!-- Define el título que se mostrará en la pestaña del navegador -->
 
 <h1>Tipo Actor</h1>  <!-- Encabezado principal de la página -->
 
+@if (cargandoSesion)
+{
+    <p><em>Verificando sesión...</em></p>
+    return;
+}
+
+
 <div class="mb-3">
     <input class="form-control" @bind="nuevoNombre" placeholder="Nombre del tipo de actor" />
-    <button class="btn btn-success mt-2" @onclick="CrearTipoActor">Crear</button>
+    @if (PuedeCrear)
+    {
+        <button class="btn btn-success mt-2" @onclick="CrearTipoActor">Crear</button>
+    }
 </div>
 
 <!-- Bloque condicional que muestra un indicador de carga si los datos están cargando -->
@@ -71,8 +84,14 @@ else
                         }
                         else
                         {
-                            <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarTipoActor(id)">Eliminar</button>
+                            @if (PuedeEditar)
+                            {
+                                <button class="btn btn-sm btn-primary me-1" @onclick="() => EmpezarEdicion(id, nombre)">Editar</button>
+                            }
+                            @if (PuedeEliminar)
+                            {
+                                <button class="btn btn-sm btn-danger" @onclick="() => EliminarTipoActor(id)">Eliminar</button>
+                            }
                         }
                     </td>
                 </tr>
@@ -92,6 +111,13 @@ else
 }
 
 @code {
+    private bool cargandoSesion = true;
+
+    private bool PuedeCrear => Sesion.EsAdministrador;
+    private bool PuedeEditar => Sesion.EsAdministrador || Sesion.EsValidador;
+    private bool PuedeEliminar => Sesion.EsAdministrador;
+
+    
     // Lista para almacenar los tipo actor que se obtienen de la API
     private List<Dictionary<string, object>> tiposActor = new List<Dictionary<string, object>>();
     
@@ -115,9 +141,15 @@ else
     // Método que se ejecuta cuando se inicializa el componente
     protected override async Task OnInitializedAsync()
     {
-        // Llamar al método para cargar los tipo actor
+        await Sesion.CargarSesionAsync();
+        cargandoSesion = false;
+
+        if (!Sesion.TieneAcceso())
+            return;
+
         await CargarTipoActor();
     }
+
 
     // Método asíncrono para cargar los tipo actor desde la API
     private async Task CargarTipoActor()
@@ -177,6 +209,7 @@ else
     // Crear nuevo tipoActor
     private async Task CrearTipoActor()
     {
+        if (!PuedeCrear) return;
         // Verifica que el nombre no esté vacío ni sea solo espacios
         if (!string.IsNullOrWhiteSpace(nuevoNombre))
         {
@@ -217,6 +250,7 @@ else
     // Guardar cambios de edición
     private async Task GuardarEdicion(string id)
     {
+        if (!PuedeEditar) return;
         try
         {
             var datos = new Dictionary<string, object?>
@@ -252,6 +286,7 @@ else
     // Eliminar
     private async Task EliminarTipoActor(string id)
     {
+        if (!PuedeEliminar) return;
         var confirmado = await JSRuntime.InvokeAsync<bool>("confirm", $"¿Estás seguro de eliminar el tipo actor con ID {id}?");
         if (confirmado)
         {
