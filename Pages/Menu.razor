@@ -4,37 +4,67 @@
 @using FrontBlazor.Services
 @inject SesionUsuarioService SesionUsuario
 
-<h3 class="text-center mt-4">Bienvenido, @SesionUsuario.Email</h3>
+<PageTitle>Menú principal</PageTitle>
 
 @if (cargandoSesion)
 {
-    <p class="text-center text-muted">Verificando sesión...</p>
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3 text-muted">Verificando sesión...</p>
+    </div>
     return;
 }
+
 @if (!SesionUsuario.EstaLogueado)
 {
     <p class="text-center text-danger">Redirigiendo al login...</p>
 }
 else
 {
-    <div class="container mt-4">
-        <div class="row justify-content-center gap-3">
-            <button class="btn btn-primary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/actor"))">Ir a actor</button>
-            <button class="btn btn-secondary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/fuente"))">Ir a fuente</button>
-            <button class="btn btn-success col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/indicador"))">Ir a indicador</button>
-            <button class="btn btn-info col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/represen-visual"))">Ir a represen visual</button>
-            <button class="btn btn-warning col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/sentido"))">Ir a sentido</button>
-            <button class="btn btn-dark col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/tipo-actor"))">Ir a tipo actor</button>
-            <button class="btn btn-light col-4 text-dark" @onclick="@(() => navegacionManager.NavigateTo("/tipo-indicador"))">Ir a tipo indicador</button>
-            <button class="btn btn-primary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/Unidad-Medicion"))">Ir a unidad medición</button>
-            <button class="btn btn-secondary col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/variable"))">Ir a variable</button>
-            <button class="btn btn-success col-4 text-white" @onclick="@(() => navegacionManager.NavigateTo("/variable-indicador"))">Ir a variable indicador</button>
+    <div class="container mt-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark">Bienvenido</h2>
+            <h5 class="text-primary">@SesionUsuario.Email</h5>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 justify-content-center">
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/actor"))">Actor</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/fuente"))">Fuente</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/indicador"))">Indicador</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/represen-visual"))">Representación Visual</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/sentido"))">Sentido</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/tipo-actor"))">Tipo Actor</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/tipo-indicador"))">Tipo Indicador</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/Unidad-Medicion"))">Unidad Medición</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/variable"))">Variable</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/variable-indicador"))">Variable Indicador</button>
+            </div>
         </div>
     </div>
 }
 
 @code {
     private bool cargandoSesion = true;
+
     protected override async Task OnInitializedAsync()
     {
         await SesionUsuario.CargarDesdeLocalStorageAsync();
