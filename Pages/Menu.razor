@@ -27,36 +27,43 @@ else
             <h5 class="text-primary">@SesionUsuario.Email</h5>
         </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 justify-content-center">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
+            <!-- Botones del menú con clases de estilo -->
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/actor"))">Actor</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/actor"))">Actor</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/fuente"))">Fuente</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/fuente"))">Fuente</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/indicador"))">Indicador</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/indicador"))">Indicador</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/represen-visual"))">Representación Visual</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/represen-visual"))">Representación Visual</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/sentido"))">Sentido</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/sentido"))">Sentido</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/tipo-actor"))">Tipo Actor</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/tipo-actor"))">Tipo Actor</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/tipo-indicador"))">Tipo Indicador</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/tipo-indicador"))">Tipo Indicador</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/Unidad-Medicion"))">Unidad Medición</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/Unidad-Medicion"))">Unidad Medición</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/variable"))">Variable</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/variable"))">Variable</button>
             </div>
             <div class="col">
-                <button class="btn btn-primary w-100" @onclick="@(() => navegacionManager.NavigateTo("/variable-indicador"))">Variable Indicador</button>
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/variable-indicador"))">Variable Indicador</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/usuario"))">Usuario</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-lg btn-primary w-100 menu-button" @onclick="@(() => navegacionManager.NavigateTo("/consultas"))">Consultas</button>
             </div>
         </div>
     </div>

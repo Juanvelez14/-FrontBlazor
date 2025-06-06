@@ -13,7 +13,7 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
     public class ServicioEntidad // Declarar una clase pública llamada ServicioEntidad
     {
         private readonly HttpClient _clienteHttp;       // Cliente HTTP que se usará para comunicarse con la API
-         private readonly string baseUrl = "http://localhost:5239";
+        private readonly string baseUrl = "http://localhost:5239";
         private readonly JsonSerializerOptions _opcionesJson;  // Opciones para configurar cómo se serializa/deserializa el JSON
         private readonly IJSRuntime _js;
 
@@ -23,12 +23,12 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         {
             _clienteHttp = clienteHttp;    // Guardar el HttpClient recibido para usarlo en los métodos
             _js = js;
-            
+
             // Configurar las opciones para el serializador JSON
             _opcionesJson = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true   // Permitir que coincidan propiedades aunque tengan diferente capitalización 
-                                                    // (por ejemplo: "Nombre" coincidirá con "nombre")
+                                                     // (por ejemplo: "Nombre" coincidirá con "nombre")
             };
         }
 
@@ -41,11 +41,11 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         {
             // Esta función devuelve una lista de diccionarios, donde cada diccionario representa una fila de la tabla
             // Cada diccionario tiene como clave el nombre de la columna y como valor el dato de esa columna
-            
+
             try  // Intentar ejecutar el código dentro de este bloque
             {
                 var url = $"{nombreProyecto}/{nombreTabla}";  // Construir la URL usando interpolación de strings
-                
+
                 // Realizar la petición GET y convertir la respuesta JSON a una lista de diccionarios
                 return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url);
             }
@@ -53,7 +53,7 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
             {
                 // Mostrar el error en la consola para depuración
                 Console.WriteLine($"Error al obtener datos: {ex.Message}");
-                
+
                 // Devolver una lista vacía en lugar de null para evitar errores en la interfaz
                 return new List<Dictionary<string, object>>();
             }
@@ -67,23 +67,23 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
         /// <param name="nombreClave">Nombre del campo clave.</param>
         /// <param name="valorClave">Valor de la clave a buscar.</param>
         public async Task<Dictionary<string, object>?> ObtenerPorClaveAsync(
-            string nombreProyecto, 
-            string nombreTabla, 
-            string nombreClave, 
+            string nombreProyecto,
+            string nombreTabla,
+            string nombreClave,
             string valorClave)
         {
             // Esta función busca una entidad específica por su clave primaria
             // Devuelve un diccionario que representa la fila encontrada, o null si no se encuentra
-            
+
             try
             {
                 // Construir la URL incluyendo la clave primaria y su valor
                 var url = $"{nombreProyecto}/{nombreTabla}/{nombreClave}/{valorClave}";
-                
+
                 // Realizar la petición GET y convertir la respuesta JSON a una lista de diccionarios
                 // (La API devuelve una lista aunque solo contenga un elemento)
                 var resultado = await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url);
-                
+
                 // Devolver el primer elemento de la lista (o null si la lista está vacía)
                 return resultado?.FirstOrDefault();
             }
@@ -179,7 +179,7 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
                 return false;
             }
         }
-     
+
 
 
         public async Task<List<Dictionary<string, object>>?> EjecutarProcedimientoAsync(
@@ -256,13 +256,120 @@ namespace FrontBlazor.Services  // Definir el espacio de nombres donde se ubicar
             var url = $"{baseUrl}/api/{nombreProyecto}/{nombreTabla}/verificar-usuario";
             return await _clienteHttp.PostAsJsonAsync(url, datos);
         }
+        // ------------------------------------------
+        //       MÉTODOS PARA LAS 6 CONSULTAS
+        // ------------------------------------------
 
+        /// <summary>
+        /// Consulta 1: GET /api/consultas/1
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>?> ObtenerConsulta1Async()
+        {
+            try
+            {
+                // La ruta en el servidor es “/api/consultas/1”
+                // Dado que tu HttpClient base es "http://localhost:5239/api/",
+                // aquí solo ponemos “consultas/1”
+                var url = "consultas/1";
+                return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerConsulta1Async: {ex.Message}");
+                return new List<Dictionary<string, object>>();
+            }
+        }
 
+        /// <summary>
+        /// Consulta 2: GET /api/consultas/2
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>?> ObtenerConsulta2Async()
+        {
+            try
+            {
+                var url = "consultas/2";
+                return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerConsulta2Async: {ex.Message}");
+                return new List<Dictionary<string, object>>();
+            }
+        }
 
+        /// <summary>
+        /// Consulta 3: GET /api/consultas/3
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>?> ObtenerConsulta3Async()
+        {
+            try
+            {
+                var url = "consultas/3";
+                return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerConsulta3Async: {ex.Message}");
+                return new List<Dictionary<string, object>>();
+            }
+        }
+
+        /// <summary>
+        /// Consulta 4: GET /api/consultas/4
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>?> ObtenerConsulta4Async()
+        {
+            try
+            {
+                var url = "consultas/4";
+                return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerConsulta4Async: {ex.Message}");
+                return new List<Dictionary<string, object>>();
+            }
+        }
+
+        /// <summary>
+        /// Consulta 5: GET /api/consultas/5
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>?> ObtenerConsulta5Async()
+        {
+            try
+            {
+                var url = "consultas/5";
+                return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerConsulta5Async: {ex.Message}");
+                return new List<Dictionary<string, object>>();
+            }
+        }
+
+        /// <summary>
+        /// Consulta 6: GET /api/consultas/6
+        /// </summary>
+        public async Task<List<Dictionary<string, object>>?> ObtenerConsulta6Async()
+        {
+            try
+            {
+                var url = "consultas/6";
+                return await _clienteHttp.GetFromJsonAsync<List<Dictionary<string, object>>>(url, _opcionesJson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerConsulta6Async: {ex.Message}");
+                return new List<Dictionary<string, object>>();
+            }
+        }
     }
+}
+
 
     
-}
+
 
 
 

@@ -1,0 +1,430 @@
+@page "/consultas"
+@using System.Collections.Generic
+@using FrontBlazor.Services
+@inject ServicioEntidad servicioEntidad
+
+<div class="container mt-4">
+    <h2 class="mb-3">Consultas SQL</h2>
+    <p class="text-muted">A continuación verás los resultados de cada una de las seis consultas.</p>
+
+    <!-- ======================== Sección 1 ======================== -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <strong>1. Indicadores + TipoIndicador + UnidadMedición + Sentido</strong>
+        </div>
+        <div class="card-body">
+            @if (datos1 is null)
+            {
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (!datos1.Any())
+            {
+                <div class="alert alert-warning mb-0">No hay datos en consulta 1.</div>
+            }
+            else
+            {
+                @foreach (var fila in datos1)
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("id")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Código:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("codigo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Nombre:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("nombre")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Objetivo:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("objetivo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Alcance:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("alcance")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fórmula:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("formula")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Tipo Indicador:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("tipoIndicador")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Unidad Medición:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("unidadMedicion")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Meta:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("meta")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Sentido:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("sentido")</div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- ======================== Sección 2 ======================== -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <strong>2. Indicadores + Representación Visual</strong>
+        </div>
+        <div class="card-body">
+            @if (datos2 is null)
+            {
+                <div class="text-center py-3">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (!datos2.Any())
+            {
+                <div class="alert alert-warning mb-0">No hay datos en consulta 2.</div>
+            }
+            else
+            {
+                @foreach (var fila in datos2)
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("id")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Nombre:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("nombre")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Código:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("codigo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Objetivo:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("objetivo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fórmula:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("formula")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Meta:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("meta")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Representación Visual:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("representacionVisual")</div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- ======================== Sección 3 ======================== -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <strong>3. Indicadores + Responsables (Actor) + Tipo Actor</strong>
+        </div>
+        <div class="card-body">
+            @if (datos3 is null)
+            {
+                <div class="text-center py-3">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (!datos3.Any())
+            {
+                <div class="alert alert-warning mb-0">No hay datos en consulta 3.</div>
+            }
+            else
+            {
+                @foreach (var fila in datos3)
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("id")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Nombre:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("nombre")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Código:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("codigo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Objetivo:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("objetivo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fórmula:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("formula")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Meta:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("meta")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Responsable:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("responsable")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Tipo Actor:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("tipoActor")</div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- ======================== Sección 4 ======================== -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <strong>4. Indicadores + Fuentes</strong>
+        </div>
+        <div class="card-body">
+            @if (datos4 is null)
+            {
+                <div class="text-center py-3">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (!datos4.Any())
+            {
+                <div class="alert alert-warning mb-0">No hay datos en consulta 4.</div>
+            }
+            else
+            {
+                @foreach (var fila in datos4)
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("id")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Nombre:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("nombre")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Código:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("codigo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Objetivo:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("objetivo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fórmula:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("formula")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Meta:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("meta")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fuente:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("fuente")</div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- ======================== Sección 5 ======================== -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <strong>5. Indicadores + Variables + Dato + FechaDato</strong>
+        </div>
+        <div class="card-body">
+            @if (datos5 is null)
+            {
+                <div class="text-center py-3">
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (!datos5.Any())
+            {
+                <div class="alert alert-warning mb-0">No hay datos en consulta 5.</div>
+            }
+            else
+            {
+                @foreach (var fila in datos5)
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("id")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Nombre:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("nombre")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Código:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("codigo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Objetivo:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("objetivo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fórmula:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("formula")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Meta:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("meta")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Variable:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("variable")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Dato:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("dato")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fecha Dato:</label>
+                            <div class="col-sm-9">
+                                @{
+                                    var rawFecha = fila.GetValueOrDefault("fechadato")?.ToString();
+                                    if (!string.IsNullOrWhiteSpace(rawFecha) && DateTime.TryParse(rawFecha, out var dt))
+                                    {
+                                        @dt.ToString("yyyy-MM-dd")
+                                    }
+                                    else
+                                    {
+                                        @("-")
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- ======================== Sección 6 ======================== -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <strong>6. Todos los campos de Indicador + ResultadoIndicador</strong>
+        </div>
+        <div class="card-body">
+            @if (datos6 is null)
+            {
+                <div class="text-center py-3">
+                    <div class="spinner-border text-dark" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (!datos6.Any())
+            {
+                <div class="alert alert-warning mb-0">No hay datos en consulta 6.</div>
+            }
+            else
+            {
+                @foreach (var fila in datos6)
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("id")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Código:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("codigo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Nombre:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("nombre")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Objetivo:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("objetivo")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Alcance:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("alcance")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fórmula:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("formula")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Meta:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("meta")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Id Resultado:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("idResultado")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Resultado:</label>
+                            <div class="col-sm-9">@fila.GetValueOrDefault("resultado")</div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Fecha Cálculo:</label>
+                            <div class="col-sm-9">
+                                @{
+                                    var rawFechaCalc = fila.GetValueOrDefault("fechaCalculo")?.ToString();
+                                    if (!string.IsNullOrWhiteSpace(rawFechaCalc) && DateTime.TryParse(rawFechaCalc, out var dt2))
+                                    {
+                                        @dt2.ToString("yyyy-MM-dd")
+                                    }
+                                    else
+                                    {
+                                        @("-")
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Dictionary<string, object>>? datos1;
+    private List<Dictionary<string, object>>? datos2;
+    private List<Dictionary<string, object>>? datos3;
+    private List<Dictionary<string, object>>? datos4;
+    private List<Dictionary<string, object>>? datos5;
+    private List<Dictionary<string, object>>? datos6;
+
+    protected override async Task OnInitializedAsync()
+    {
+        datos1 = await servicioEntidad.ObtenerConsulta1Async();
+        datos2 = await servicioEntidad.ObtenerConsulta2Async();
+        datos3 = await servicioEntidad.ObtenerConsulta3Async();
+        datos4 = await servicioEntidad.ObtenerConsulta4Async();
+        datos5 = await servicioEntidad.ObtenerConsulta5Async();
+        datos6 = await servicioEntidad.ObtenerConsulta6Async();
+    }
+}
